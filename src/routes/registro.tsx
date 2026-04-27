@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +21,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Stethoscope, ShieldCheck, Sparkles, MessageCircle, ArrowRight } from "lucide-react";
+import {
+  Stethoscope,
+  ShieldCheck,
+  Sparkles,
+  MessageCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/registro")({
   head: () => ({
