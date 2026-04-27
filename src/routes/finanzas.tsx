@@ -423,3 +423,247 @@ function PresupuestoSection({ rate }: { rate: number }) {
     </Card>
   );
 }
+
+/* ---------------- MÉTODOS DE PAGO (CONFIG) ---------------- */
+
+function methodIcon(m: PaymentMethod) {
+  if (m === "Zelle") return Wallet;
+  if (m === "Efectivo") return HandCoins;
+  return Smartphone;
+}
+
+const EMPTY_ACCOUNT: Omit<PaymentAccount, "id"> = {
+  method: "Zelle",
+  label: "",
+  holder: "",
+  email: "",
+  bank: "",
+  phone: "",
+  idNumber: "",
+  instructions: "",
+  active: true,
+};
+
+function MetodosSection() {
+  const accounts = usePaymentAccounts();
+  const [editing, setEditing] = useState<PaymentAccount | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CreditCard className="h-4 w-4 text-primary" /> Métodos de pago disponibles
+            </CardTitle>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Estos datos se mostrarán al paciente o secretaria al seleccionar el método al agendar una cita.
+            </p>
+          </div>
+          <Button size="sm" className="gap-1.5" onClick={() => setCreating(true)}>
+            <Plus className="h-4 w-4" /> Agregar
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {accounts.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed border-border/60 p-10 text-center">
+              <CreditCard className="mx-auto h-7 w-7 text-muted-foreground/50" />
+              <p className="mt-2 text-sm text-muted-foreground">Aún no has registrado métodos de pago.</p>
+            </div>
+          ) : (
+            accounts.map((a) => {
+              const Icon = methodIcon(a.method);
+              return (
+                <div key={a.id} className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-medium text-foreground">{a.label || a.method}</p>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{a.method}</span>
+                      {a.active ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.65_0.15_155/0.18)] px-2 py-0.5 text-[11px] font-medium text-[oklch(0.45_0.15_155)]">
+                          <CheckCircle2 className="h-3 w-3" /> Activo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+                          <XCircle className="h-3 w-3" /> Inactivo
+                        </span>
+                      )}
+                    </div>
+                    <AccountDetails a={a} compact />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={a.active}
+                      onCheckedChange={(v) => paymentAccountsStore.update(a.id, { active: v })}
+                    />
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditing(a)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => paymentAccountsStore.remove(a.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+
+      <AccountDialog
+        open={creating || !!editing}
+        initial={editing ?? EMPTY_ACCOUNT}
+        onClose={() => {
+          setEditing(null);
+          setCreating(false);
+        }}
+        onSave={(data) => {
+          if (editing) paymentAccountsStore.update(editing.id, data);
+          else paymentAccountsStore.add(data);
+          setEditing(null);
+          setCreating(false);
+        }}
+      />
+    </div>
+  );
+}
+
+export function AccountDetails({ a, compact = false }: { a: PaymentAccount; compact?: boolean }) {
+  const rows: Array<[string, string | undefined]> = [
+    ["Titular", a.holder],
+    ["Email", a.email],
+    ["Banco", a.bank],
+    ["Teléfono", a.phone],
+    ["Cédula/RIF", a.idNumber],
+    ["Instrucciones", a.instructions],
+  ];
+  const filled = rows.filter(([, v]) => v && v.trim() !== "");
+  if (filled.length === 0) return null;
+
+  if (compact) {
+    return (
+      <p className="truncate text-xs text-muted-foreground">
+        {filled.map(([k, v]) => `${k}: ${v}`).join(" · ")}
+      </p>
+    );
+  }
+
+  return (
+    <dl className="grid grid-cols-1 gap-1.5 text-sm sm:grid-cols-[110px_1fr]">
+      {filled.map(([k, v]) => (
+        <div key={k} className="contents">
+          <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground sm:py-0.5">{k}</dt>
+          <dd className="text-foreground">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function AccountDialog({
+  open,
+  initial,
+  onSave,
+  onClose,
+}: {
+  open: boolean;
+  initial: Omit<PaymentAccount, "id"> | PaymentAccount;
+  onSave: (data: Omit<PaymentAccount, "id">) => void;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState<Omit<PaymentAccount, "id">>(initial);
+  // Reset when initial changes
+  const initialKey = "id" in initial ? initial.id : "new";
+  const [key, setKey] = useState(initialKey);
+  if (key !== initialKey) {
+    setKey(initialKey);
+    setForm(initial);
+  }
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.label.trim() || !form.holder.trim()) return;
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{"id" in initial ? "Editar método" : "Nuevo método de pago"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={submit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Tipo *</Label>
+            <Select value={form.method} onValueChange={(v) => set("method", v as PaymentMethod)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {METHOD_OPTIONS.map((m) => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Etiqueta *</Label>
+            <Input value={form.label} onChange={(e) => set("label", e.target.value)} required maxLength={60} placeholder="Ej. Zelle Principal" />
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Titular *</Label>
+            <Input value={form.holder} onChange={(e) => set("holder", e.target.value)} required maxLength={100} />
+          </div>
+
+          {form.method === "Zelle" && (
+            <div className="space-y-1 sm:col-span-2">
+              <Label>Email Zelle</Label>
+              <Input type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} maxLength={120} placeholder="pagos@correo.com" />
+            </div>
+          )}
+
+          {form.method === "Pago Móvil" && (
+            <>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Banco</Label>
+                <Input value={form.bank ?? ""} onChange={(e) => set("bank", e.target.value)} maxLength={80} placeholder="0102 - Banco de Venezuela" />
+              </div>
+              <div className="space-y-1">
+                <Label>Teléfono</Label>
+                <Input value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value.replace(/\D/g, ""))} maxLength={15} placeholder="04141234567" inputMode="numeric" />
+              </div>
+              <div className="space-y-1">
+                <Label>Cédula/RIF</Label>
+                <Input value={form.idNumber ?? ""} onChange={(e) => set("idNumber", e.target.value)} maxLength={20} placeholder="V-12345678" />
+              </div>
+            </>
+          )}
+
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Instrucciones</Label>
+            <Textarea value={form.instructions ?? ""} onChange={(e) => set("instructions", e.target.value)} maxLength={300} className="min-h-[60px]" placeholder="Notas adicionales para el paciente" />
+          </div>
+
+          <div className="flex items-center gap-2 sm:col-span-2">
+            <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} />
+            <Label className="cursor-pointer">Activo (visible al agendar)</Label>
+          </div>
+
+          <DialogFooter className="sm:col-span-2">
+            <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+            <Button type="submit">Guardar</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
