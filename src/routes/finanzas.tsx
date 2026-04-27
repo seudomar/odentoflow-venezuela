@@ -802,3 +802,114 @@ function AccountDialog({
     </Dialog>
   );
 }
+
+/* ---------------- CATÁLOGO DE SERVICIOS (EDITOR) ---------------- */
+
+function CatalogEditor() {
+  const services = useServices();
+  const [newName, setNewName] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+
+  const addService = () => {
+    const name = newName.trim();
+    const price = parseFloat(newPrice);
+    if (!name || isNaN(price) || price < 0) return;
+    servicesStore.add({ name: name.slice(0, 120), priceUSD: price });
+    setNewName("");
+    setNewPrice("");
+  };
+
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs font-semibold text-foreground">Editar catálogo</p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 gap-1.5 text-[11px] text-muted-foreground hover:text-foreground"
+          onClick={() => {
+            if (confirm("¿Restaurar la lista predeterminada de servicios? Se perderán los cambios y servicios añadidos.")) {
+              servicesStore.reset();
+            }
+          }}
+        >
+          <RotateCcw className="h-3 w-3" /> Restaurar
+        </Button>
+      </div>
+
+      <div className="space-y-1.5">
+        {services.map((s) => (
+          <ServiceRow key={s.id} service={s} />
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-col gap-2 border-t pt-3 sm:flex-row">
+        <Input
+          placeholder="Nuevo servicio"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          maxLength={120}
+          className="h-9 flex-1"
+        />
+        <Input
+          placeholder="Precio USD"
+          value={newPrice}
+          onChange={(e) => setNewPrice(e.target.value.replace(/[^\d.]/g, ""))}
+          inputMode="decimal"
+          className="h-9 sm:w-32"
+        />
+        <Button type="button" size="sm" onClick={addService} className="gap-1.5">
+          <Plus className="h-3.5 w-3.5" /> Añadir
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ServiceRow({ service }: { service: Service }) {
+  const [name, setName] = useState(service.name);
+  const [price, setPrice] = useState(String(service.priceUSD));
+
+  const commit = () => {
+    const trimmed = name.trim().slice(0, 120);
+    const p = parseFloat(price);
+    const patch: Partial<Service> = {};
+    if (trimmed && trimmed !== service.name) patch.name = trimmed;
+    if (!isNaN(p) && p >= 0 && p !== service.priceUSD) patch.priceUSD = p;
+    if (Object.keys(patch).length > 0) servicesStore.update(service.id, patch);
+    if (!trimmed) setName(service.name);
+    if (isNaN(p) || p < 0) setPrice(String(service.priceUSD));
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={commit}
+        maxLength={120}
+        className="h-8 flex-1 text-sm"
+      />
+      <div className="relative w-24">
+        <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">$</span>
+        <Input
+          value={price}
+          onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ""))}
+          onBlur={commit}
+          inputMode="decimal"
+          className="h-8 pl-5 text-right text-sm"
+        />
+      </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+        onClick={() => servicesStore.remove(service.id)}
+        title="Eliminar"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+}
