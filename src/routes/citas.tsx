@@ -38,6 +38,8 @@ import {
   type Appointment,
   type AppointmentStatus,
 } from "@/lib/appointments-store";
+import { usePaymentAccounts } from "@/lib/payment-accounts-store";
+import { AccountDetails } from "@/routes/finanzas";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/citas")({
