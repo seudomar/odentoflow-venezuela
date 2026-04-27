@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { StatCard } from "@/components/StatCard";
+import { AuthGuard } from "@/components/AuthGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, UserPlus, DollarSign, Banknote, Clock } from "lucide-react";
 
@@ -36,6 +37,7 @@ function Dashboard() {
   ];
 
   return (
+    <AuthGuard>
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-muted/30">
         <AppSidebar />
@@ -142,5 +144,6 @@ function Dashboard() {
         </SidebarInset>
       </div>
     </SidebarProvider>
+    </AuthGuard>
   );
 }
