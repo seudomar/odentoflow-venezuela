@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Odontogram } from "@/components/Odontogram";
+import { TreatmentPlan } from "@/components/TreatmentPlan";
 import { usePatient, patientsStore, type PatientFile } from "@/lib/patients-store";
 import {
   ArrowLeft,
@@ -16,6 +17,7 @@ import {
   FileText,
   Image as ImageIcon,
   Activity,
+  ClipboardList,
   Phone,
   Mail,
   MapPin,
@@ -89,9 +91,10 @@ function PatientDetail() {
         </div>
 
         <Tabs defaultValue="datos" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-5">
             <TabsTrigger value="datos" className="gap-1.5"><User className="h-3.5 w-3.5" /><span className="hidden sm:inline">Datos</span></TabsTrigger>
             <TabsTrigger value="historia" className="gap-1.5"><FileText className="h-3.5 w-3.5" /><span className="hidden sm:inline">Historia</span></TabsTrigger>
+            <TabsTrigger value="plan" className="gap-1.5"><ClipboardList className="h-3.5 w-3.5" /><span className="hidden sm:inline">Plan</span></TabsTrigger>
             <TabsTrigger value="archivos" className="gap-1.5"><ImageIcon className="h-3.5 w-3.5" /><span className="hidden sm:inline">Archivos</span></TabsTrigger>
             <TabsTrigger value="odontograma" className="gap-1.5"><Activity className="h-3.5 w-3.5" /><span className="hidden sm:inline">Odontograma</span></TabsTrigger>
           </TabsList>
@@ -134,6 +137,11 @@ function PatientDetail() {
                 <p className="mt-2 text-xs text-muted-foreground">{history.length}/5000 caracteres</p>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Plan de Tratamiento */}
+          <TabsContent value="plan">
+            <TreatmentPlan patient={patient} />
           </TabsContent>
 
           {/* Archivos */}
