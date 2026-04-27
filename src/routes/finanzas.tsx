@@ -26,6 +26,8 @@ import {
   Smartphone,
   HandCoins,
   Calculator,
+  Settings2,
+  RotateCcw,
   Printer,
   CreditCard,
   Pencil,
@@ -294,24 +296,39 @@ function PagosSection({ rate }: { rate: number }) {
 
 interface BudgetItem {
   id: string;
+  serviceId?: string;
   service: string;
   qty: number;
   priceUSD: number;
 }
 
-const STARTER: BudgetItem[] = [
-  { id: "i1", service: "", qty: 1, priceUSD: 0 },
-];
+const STARTER: BudgetItem[] = [];
 
 function PresupuestoSection({ rate }: { rate: number }) {
+  const services = useServices();
   const [patient, setPatient] = useState("");
   const [items, setItems] = useState<BudgetItem[]>(STARTER);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   const updateItem = (id: string, patch: Partial<BudgetItem>) =>
     setItems((arr) => arr.map((i) => (i.id === id ? { ...i, ...patch } : i)));
-  const removeItem = (id: string) => setItems((arr) => (arr.length > 1 ? arr.filter((i) => i.id !== id) : arr));
-  const addItem = () =>
+  const removeItem = (id: string) => setItems((arr) => arr.filter((i) => i.id !== id));
+  const addCustom = () =>
     setItems((arr) => [...arr, { id: `i${Date.now()}`, service: "", qty: 1, priceUSD: 0 }]);
+  const addFromCatalog = (svcId: string) => {
+    const svc = services.find((s) => s.id === svcId);
+    if (!svc) return;
+    setItems((arr) => {
+      const existing = arr.find((i) => i.serviceId === svcId);
+      if (existing) {
+        return arr.map((i) => (i.id === existing.id ? { ...i, qty: i.qty + 1 } : i));
+      }
+      return [
+        ...arr,
+        { id: `i${Date.now()}`, serviceId: svc.id, service: svc.name, qty: 1, priceUSD: svc.priceUSD },
+      ];
+    });
+  };
 
   const totals = useMemo(() => {
     const usd = items.reduce((s, i) => s + i.qty * i.priceUSD, 0);
