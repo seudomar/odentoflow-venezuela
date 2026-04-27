@@ -159,6 +159,9 @@ function CitasPage() {
 
 function AppointmentRow({ appt }: { appt: Appointment }) {
   const meta = STATUS_META[appt.status];
+  const accounts = usePaymentAccounts();
+  const account = appt.paymentAccountId ? accounts.find((a) => a.id === appt.paymentAccountId) : undefined;
+  const [showPay, setShowPay] = useState(false);
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center">
       <div className="flex h-12 w-14 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -174,6 +177,15 @@ function AppointmentRow({ appt }: { appt: Appointment }) {
           >
             {meta.label}
           </span>
+          {account && (
+            <button
+              type="button"
+              onClick={() => setShowPay(true)}
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
+            >
+              💳 {account.method}
+            </button>
+          )}
         </div>
         <p className="truncate text-xs text-muted-foreground">{appt.treatment}</p>
         <p className="truncate text-[11px] text-muted-foreground/80">{appt.patientPhone ? `+${appt.patientPhone}` : "Sin teléfono"}</p>
@@ -220,6 +232,17 @@ function AppointmentRow({ appt }: { appt: Appointment }) {
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+
+      {account && (
+        <Dialog open={showPay} onOpenChange={setShowPay}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Datos de pago — {account.label}</DialogTitle>
+            </DialogHeader>
+            <AccountDetails a={account} />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
