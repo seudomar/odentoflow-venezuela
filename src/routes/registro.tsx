@@ -200,9 +200,12 @@ function RegistroPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
-                placeholder="Mínimo 6 caracteres"
+                minLength={8}
+                placeholder="Mínimo 8 caracteres"
               />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Usa al menos 8 caracteres combinando letras, números y un símbolo. Evita contraseñas comunes como "123456".
+              </p>
             </div>
 
             <div className="flex items-start gap-2.5 rounded-lg border bg-muted/30 p-3">
