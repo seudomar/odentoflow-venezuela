@@ -31,6 +31,8 @@ import {
   Pencil,
   CheckCircle2,
   XCircle,
+  Landmark,
+  Bitcoin,
 } from "lucide-react";
 import { useBcvRate } from "@/lib/rate-store";
 import {
@@ -430,7 +432,10 @@ function PresupuestoSection({ rate }: { rate: number }) {
 function methodIcon(m: PaymentMethod) {
   if (m === "Zelle") return Wallet;
   if (m === "Efectivo") return HandCoins;
-  return Smartphone;
+  if (m === "Pago Móvil") return Smartphone;
+  if (m === "Transferencia") return Landmark;
+  if (m === "Binance") return Bitcoin;
+  return Wallet;
 }
 
 const EMPTY_ACCOUNT: Omit<PaymentAccount, "id"> = {
@@ -441,6 +446,12 @@ const EMPTY_ACCOUNT: Omit<PaymentAccount, "id"> = {
   bank: "",
   phone: "",
   idNumber: "",
+  accountNumber: "",
+  accountType: "Corriente",
+  swiftCode: "",
+  binanceId: "",
+  binanceNetwork: "",
+  binanceEmail: "",
   instructions: "",
   active: true,
 };
@@ -543,8 +554,14 @@ export function AccountDetails({ a, compact = false }: { a: PaymentAccount; comp
     ["Titular", a.holder],
     ["Email", a.email],
     ["Banco", a.bank],
+    ["N° Cuenta", a.accountNumber],
+    ["Tipo", a.accountType],
+    ["SWIFT", a.swiftCode],
     ["Teléfono", a.phone],
     ["Cédula/RIF", a.idNumber],
+    ["Binance ID", a.binanceId],
+    ["Email Binance", a.binanceEmail],
+    ["Red/Moneda", a.binanceNetwork],
     ["Instrucciones", a.instructions],
   ];
   const filled = rows.filter(([, v]) => v && v.trim() !== "");
@@ -645,6 +662,54 @@ function AccountDialog({
               <div className="space-y-1">
                 <Label>Cédula/RIF</Label>
                 <Input value={form.idNumber ?? ""} onChange={(e) => set("idNumber", e.target.value)} maxLength={20} placeholder="V-12345678" />
+              </div>
+            </>
+          )}
+
+          {form.method === "Transferencia" && (
+            <>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Banco *</Label>
+                <Input value={form.bank ?? ""} onChange={(e) => set("bank", e.target.value)} maxLength={80} placeholder="0134 - Banesco" />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Número de cuenta *</Label>
+                <Input value={form.accountNumber ?? ""} onChange={(e) => set("accountNumber", e.target.value.replace(/[^\d-]/g, ""))} maxLength={30} placeholder="0134-0000-00-0000000000" inputMode="numeric" />
+              </div>
+              <div className="space-y-1">
+                <Label>Tipo de cuenta</Label>
+                <Select value={form.accountType ?? "Corriente"} onValueChange={(v) => set("accountType", v as "Corriente" | "Ahorro")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Corriente">Corriente</SelectItem>
+                    <SelectItem value="Ahorro">Ahorro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Cédula/RIF</Label>
+                <Input value={form.idNumber ?? ""} onChange={(e) => set("idNumber", e.target.value)} maxLength={20} placeholder="V-12345678" />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>SWIFT / Código (opcional)</Label>
+                <Input value={form.swiftCode ?? ""} onChange={(e) => set("swiftCode", e.target.value.toUpperCase())} maxLength={20} placeholder="BANEVECA" />
+              </div>
+            </>
+          )}
+
+          {form.method === "Binance" && (
+            <>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Binance Pay ID *</Label>
+                <Input value={form.binanceId ?? ""} onChange={(e) => set("binanceId", e.target.value.replace(/\D/g, ""))} maxLength={20} placeholder="123456789" inputMode="numeric" />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Email Binance</Label>
+                <Input type="email" value={form.binanceEmail ?? ""} onChange={(e) => set("binanceEmail", e.target.value)} maxLength={120} placeholder="usuario@correo.com" />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label>Red / Moneda aceptada</Label>
+                <Input value={form.binanceNetwork ?? ""} onChange={(e) => set("binanceNetwork", e.target.value)} maxLength={60} placeholder="USDT (BEP20), BTC, etc." />
               </div>
             </>
           )}
