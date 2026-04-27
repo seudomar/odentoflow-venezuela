@@ -213,6 +213,7 @@ function BudgetDialog({
   rate: number;
   totalUSD: number;
 }) {
+  const [clinic] = useClinicSettings();
   const today = new Date().toLocaleDateString("es-VE", { day: "2-digit", month: "long", year: "numeric" });
   const totalVEF = totalUSD * rate;
 
@@ -233,7 +234,9 @@ function BudgetDialog({
         .totals { margin-top: 16px; display: flex; justify-content: flex-end; }
         .totals table { width: 280px; }
         .muted { color: #777; font-size: 12px; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 12px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 12px; gap: 16px; }
+        .logo { max-height: 64px; max-width: 140px; object-fit: contain; }
+        .footer { margin-top: 24px; padding-top: 12px; border-top: 1px dashed #ccc; font-size: 12px; color: #444; white-space: pre-wrap; }
       </style></head><body>${node.innerHTML}</body></html>`);
     w.document.close();
     setTimeout(() => { w.focus(); w.print(); }, 200);
@@ -247,17 +250,22 @@ function BudgetDialog({
         </DialogHeader>
 
         <div id="budget-print-area" className="max-h-[60vh] overflow-y-auto rounded-md border bg-white p-5 text-[13px] text-neutral-900">
-          <div className="header" style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid #111", paddingBottom: 12 }}>
-            <div>
-              <h1 style={{ fontSize: 18, margin: 0 }}>{CLINIC.name}</h1>
-              <div className="muted">{CLINIC.doctor} · RIF {CLINIC.rif}</div>
-              <div className="muted">{CLINIC.address}</div>
-              <div className="muted">{CLINIC.phone} · {CLINIC.email}</div>
+          <div className="header" style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid #111", paddingBottom: 12, gap: 16 }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              {clinic.logoDataUrl && (
+                <img src={clinic.logoDataUrl} alt="Logo" className="logo" style={{ maxHeight: 64, maxWidth: 140, objectFit: "contain" }} />
+              )}
+              <div>
+                <h1 style={{ fontSize: 18, margin: 0 }}>{clinic.clinicName}</h1>
+                <div className="muted">{clinic.doctorName}{clinic.rif ? ` · RIF ${clinic.rif}` : ""}</div>
+                <div className="muted">{clinic.address}</div>
+                <div className="muted">{clinic.phone}{clinic.email ? ` · ${clinic.email}` : ""}</div>
+              </div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontWeight: 700 }}>PRESUPUESTO</div>
               <div className="muted">Fecha: {today}</div>
-              <div className="muted">Tasa BCV: Bs. {rate.toFixed(2)} / USD</div>
+              <div className="muted">Tasa {clinic.rateSource === "bcv" ? "BCV" : "manual"}: Bs. {rate.toFixed(2)} / USD</div>
             </div>
           </div>
 
@@ -300,9 +308,20 @@ function BudgetDialog({
             </table>
           </div>
 
-          <p className="muted" style={{ marginTop: 24 }}>
-            Presupuesto válido por 15 días. Los precios en bolívares se ajustan según la tasa del día.
-          </p>
+          {clinic.paymentInstructions && (
+            <>
+              <h2>Instrucciones de pago</h2>
+              <div className="footer" style={{ marginTop: 8, paddingTop: 0, borderTop: "none", whiteSpace: "pre-wrap" }}>
+                {clinic.paymentInstructions}
+              </div>
+            </>
+          )}
+
+          {clinic.legalNote && (
+            <p className="muted" style={{ marginTop: 24 }}>
+              {clinic.legalNote}
+            </p>
+          )}
         </div>
 
         <DialogFooter>
