@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PatientLayout } from "@/components/PatientLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -236,15 +236,7 @@ function ServiceDialog({
   const [category, setCategory] = useState<ServiceCategory>(editing?.category ?? "Otros");
   const [price, setPrice] = useState(editing?.priceUSD?.toString() ?? "");
 
-  // Reset on open/editing change
-  useState(() => {
-    setName(editing?.name ?? "");
-    setCategory(editing?.category ?? "Otros");
-    setPrice(editing?.priceUSD?.toString() ?? "");
-  });
-
-  // Re-sync when dialog opens with a new editing target
-  useMemo(() => {
+  useEffect(() => {
     if (open) {
       setName(editing?.name ?? "");
       setCategory(editing?.category ?? "Otros");
