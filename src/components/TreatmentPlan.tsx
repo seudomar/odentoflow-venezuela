@@ -333,3 +333,25 @@ export function StatusBadge({ status }: { status: TreatmentStatus }) {
     </Badge>
   );
 }
+
+function SpecialistSelect({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
+  const specialists = useSpecialists().filter((s) => s.active);
+  return (
+    <Select value={value ?? "__none__"} onValueChange={(v) => onChange(v === "__none__" ? "" : v)}>
+      <SelectTrigger className="h-8 w-44 text-xs">
+        <span className="flex items-center gap-1.5 truncate">
+          <Stethoscope className="h-3 w-3 shrink-0 text-muted-foreground" />
+          <SelectValue placeholder="Sin asignar" />
+        </span>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__">Sin asignar</SelectItem>
+        {specialists.map((s) => (
+          <SelectItem key={s.id} value={s.id}>
+            {s.name} ({s.commissionPct}%)
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
