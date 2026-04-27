@@ -1,8 +1,9 @@
-import { LayoutDashboard, Users, Calendar, DollarSign, FileText, Settings, Stethoscope, UserCog, Wallet } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, DollarSign, FileText, Settings, Stethoscope, UserCog, Wallet, LogOut } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -12,6 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { signOut } from "@/lib/auth-store";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -66,6 +68,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => signOut()}>
+              <LogOut className="h-4 w-4" />
+              <span>Cerrar sesión</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
