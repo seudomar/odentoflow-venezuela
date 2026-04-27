@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PatientLayout } from "@/components/PatientLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,11 +47,11 @@ const SECTIONS = [
 
 function TerminosPage() {
   return (
-    <PatientLayout>
+    <div className="min-h-screen bg-gradient-to-br from-muted/40 via-background to-primary/5 p-4 sm:p-8">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="icon">
-            <Link to="/"><ArrowLeft className="h-4 w-4" /></Link>
+            <Link to="/registro"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
           <div>
             <h1 className="flex items-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
@@ -89,6 +88,6 @@ function TerminosPage() {
           </CardContent>
         </Card>
       </div>
-    </PatientLayout>
+    </div>
   );
 }
