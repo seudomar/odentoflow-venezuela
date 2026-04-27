@@ -14,16 +14,286 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appt_date: string
+          appt_time: string
+          clinic_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          patient_id: string | null
+          patient_name: string
+          patient_phone: string
+          payment_account_id: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          treatment: string
+          updated_at: string
+        }
+        Insert: {
+          appt_date: string
+          appt_time: string
+          clinic_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          patient_name: string
+          patient_phone: string
+          payment_account_id?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          treatment: string
+          updated_at?: string
+        }
+        Update: {
+          appt_date?: string
+          appt_time?: string
+          clinic_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          patient_name?: string
+          patient_phone?: string
+          payment_account_id?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          treatment?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinic_members: {
+        Row: {
+          clinic_id: string
+          created_at: string
+          display_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["clinic_role"]
+          user_id: string
+        }
+        Insert: {
+          clinic_id: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["clinic_role"]
+          user_id: string
+        }
+        Update: {
+          clinic_id?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["clinic_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_members_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinics: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          rif: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          rif?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          rif?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      patients: {
+        Row: {
+          address: string | null
+          birth_date: string | null
+          cedula: string | null
+          clinic_id: string
+          created_at: string
+          email: string | null
+          files: Json
+          gender: string | null
+          history: string | null
+          id: string
+          last_visit: string | null
+          name: string
+          phone: string | null
+          teeth: Json
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          birth_date?: string | null
+          cedula?: string | null
+          clinic_id: string
+          created_at?: string
+          email?: string | null
+          files?: Json
+          gender?: string | null
+          history?: string | null
+          id?: string
+          last_visit?: string | null
+          name: string
+          phone?: string | null
+          teeth?: Json
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          birth_date?: string | null
+          cedula?: string | null
+          clinic_id?: string
+          created_at?: string
+          email?: string | null
+          files?: Json
+          gender?: string | null
+          history?: string | null
+          id?: string
+          last_visit?: string | null
+          name?: string
+          phone?: string | null
+          teeth?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          amount_usd: number
+          clinic_id: string
+          created_at: string
+          currency: Database["public"]["Enums"]["payment_currency"]
+          id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          note: string | null
+          patient_id: string | null
+          patient_name: string
+          payment_date: string
+          rate: number
+        }
+        Insert: {
+          amount: number
+          amount_usd: number
+          clinic_id: string
+          created_at?: string
+          currency: Database["public"]["Enums"]["payment_currency"]
+          id?: string
+          method: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          patient_id?: string | null
+          patient_name: string
+          payment_date?: string
+          rate: number
+        }
+        Update: {
+          amount?: number
+          amount_usd?: number
+          clinic_id?: string
+          created_at?: string
+          currency?: Database["public"]["Enums"]["payment_currency"]
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          patient_id?: string | null
+          patient_name?: string
+          payment_date?: string
+          rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_clinic_member: {
+        Args: { _clinic_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      appointment_status:
+        | "pendiente"
+        | "confirmado"
+        | "completado"
+        | "cancelado"
+      clinic_role: "owner" | "doctor" | "assistant"
+      payment_currency: "USD" | "VEF"
+      payment_method:
+        | "Zelle"
+        | "Efectivo"
+        | "Pago Móvil"
+        | "Transferencia"
+        | "Binance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +420,22 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      appointment_status: [
+        "pendiente",
+        "confirmado",
+        "completado",
+        "cancelado",
+      ],
+      clinic_role: ["owner", "doctor", "assistant"],
+      payment_currency: ["USD", "VEF"],
+      payment_method: [
+        "Zelle",
+        "Efectivo",
+        "Pago Móvil",
+        "Transferencia",
+        "Binance",
+      ],
+    },
   },
 } as const
