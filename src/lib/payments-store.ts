@@ -48,4 +48,4 @@ export function usePayments() {
   return useSyncExternalStore(paymentsStore.subscribe, () => payments, () => payments);
 }
 
-export const METHOD_OPTIONS: PaymentMethod[] = ["Zelle", "Efectivo", "Pago Móvil"];
+export const METHOD_OPTIONS: PaymentMethod[] = ["Zelle", "Efectivo", "Pago Móvil", "Transferencia", "Binance"];
