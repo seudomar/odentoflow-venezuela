@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -19,6 +19,10 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const [rate, setRate] = useState(36.5);
+  const [today, setToday] = useState("");
+  useEffect(() => {
+    setToday(new Date().toLocaleDateString("es-VE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
+  }, []);
   const ingresosUSD = 1240;
   const ingresosBs = ingresosUSD * rate;
 
@@ -42,7 +46,7 @@ function Dashboard() {
                 Resumen de hoy
               </h2>
               <p className="text-sm text-muted-foreground">
-                {new Date().toLocaleDateString("es-VE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                {today || "\u00A0"}
               </p>
             </div>
 
