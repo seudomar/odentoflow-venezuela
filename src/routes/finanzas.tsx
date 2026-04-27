@@ -261,7 +261,7 @@ function PagosSection({ rate }: { rate: number }) {
             payments.map((p) => (
               <div key={p.id} className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
-                  {p.method === "Zelle" ? <Wallet className="h-4 w-4" /> : p.method === "Efectivo" ? <HandCoins className="h-4 w-4" /> : <Smartphone className="h-4 w-4" />}
+                  {(() => { const I = methodIcon(p.method); return <I className="h-4 w-4" />; })()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
