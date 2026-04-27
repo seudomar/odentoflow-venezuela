@@ -38,6 +38,8 @@ import {
   type Appointment,
   type AppointmentStatus,
 } from "@/lib/appointments-store";
+import { usePaymentAccounts } from "@/lib/payment-accounts-store";
+import { AccountDetails } from "@/routes/finanzas";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/citas")({
@@ -157,6 +159,9 @@ function CitasPage() {
 
 function AppointmentRow({ appt }: { appt: Appointment }) {
   const meta = STATUS_META[appt.status];
+  const accounts = usePaymentAccounts();
+  const account = appt.paymentAccountId ? accounts.find((a) => a.id === appt.paymentAccountId) : undefined;
+  const [showPay, setShowPay] = useState(false);
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center">
       <div className="flex h-12 w-14 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -172,6 +177,15 @@ function AppointmentRow({ appt }: { appt: Appointment }) {
           >
             {meta.label}
           </span>
+          {account && (
+            <button
+              type="button"
+              onClick={() => setShowPay(true)}
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
+            >
+              💳 {account.method}
+            </button>
+          )}
         </div>
         <p className="truncate text-xs text-muted-foreground">{appt.treatment}</p>
         <p className="truncate text-[11px] text-muted-foreground/80">{appt.patientPhone ? `+${appt.patientPhone}` : "Sin teléfono"}</p>
@@ -218,6 +232,17 @@ function AppointmentRow({ appt }: { appt: Appointment }) {
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+
+      {account && (
+        <Dialog open={showPay} onOpenChange={setShowPay}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Datos de pago — {account.label}</DialogTitle>
+            </DialogHeader>
+            <AccountDetails a={account} />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
@@ -231,6 +256,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 function NewAppointmentDialog({ defaultDate, onDone }: { defaultDate: string; onDone: () => void }) {
+  const accounts = usePaymentAccounts().filter((a) => a.active);
   const [form, setForm] = useState({
     patientName: "",
     patientPhone: "",
@@ -238,18 +264,25 @@ function NewAppointmentDialog({ defaultDate, onDone }: { defaultDate: string; on
     date: defaultDate,
     time: "09:00",
     status: "pendiente" as AppointmentStatus,
+    paymentAccountId: "",
   });
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const selectedAccount = accounts.find((a) => a.id === form.paymentAccountId);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.patientName.trim() || !form.treatment.trim()) return;
-    appointmentsStore.add(form);
+    const { paymentAccountId, ...rest } = form;
+    appointmentsStore.add({
+      ...rest,
+      paymentAccountId: paymentAccountId || undefined,
+    });
     onDone();
   };
 
   return (
-    <DialogContent className="max-w-md">
+    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Nueva cita</DialogTitle>
       </DialogHeader>
@@ -291,6 +324,36 @@ function NewAppointmentDialog({ defaultDate, onDone }: { defaultDate: string; on
             </SelectContent>
           </Select>
         </div>
+
+        <div className="sm:col-span-2 space-y-1">
+          <Label>Método de pago</Label>
+          <Select value={form.paymentAccountId || "none"} onValueChange={(v) => set("paymentAccountId", v === "none" ? "" : v)}>
+            <SelectTrigger><SelectValue placeholder="Seleccionar (opcional)" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sin definir</SelectItem>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.label} · {a.method}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {accounts.length === 0 && (
+            <p className="text-[11px] text-muted-foreground">
+              No hay métodos configurados. Agrégalos en <span className="font-medium text-primary">Finanzas → Métodos</span>.
+            </p>
+          )}
+        </div>
+
+        {selectedAccount && (
+          <div className="sm:col-span-2 rounded-lg border bg-muted/30 p-3">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Datos para el pago
+            </p>
+            <AccountDetails a={selectedAccount} />
+          </div>
+        )}
+
         <DialogFooter className="sm:col-span-2">
           <Button type="button" variant="ghost" onClick={onDone}>Cancelar</Button>
           <Button type="submit">Crear cita</Button>
