@@ -18,6 +18,7 @@ import {
 import { useServices } from "@/lib/services-store";
 import { useSpecialists } from "@/lib/specialists-store";
 import { useBcvRate } from "@/lib/rate-store";
+import { useClinicSettings } from "@/lib/clinic-settings-store";
 import type { Patient } from "@/lib/patients-store";
 import { Plus, Trash2, Printer, FileDown, ClipboardList, Stethoscope } from "lucide-react";
 
@@ -25,15 +26,6 @@ const STATUS_STYLE: Record<TreatmentStatus, { color: string; bg: string }> = {
   "Pendiente": { color: "oklch(0.6 0.18 60)", bg: "oklch(0.6 0.18 60 / 0.15)" },
   "En curso": { color: "oklch(0.58 0.18 245)", bg: "oklch(0.58 0.18 245 / 0.15)" },
   "Finalizado": { color: "oklch(0.6 0.15 155)", bg: "oklch(0.6 0.15 155 / 0.15)" },
-};
-
-const CLINIC = {
-  name: "OdontoFlow · Consultorio Dental",
-  doctor: "Dr. Carlos Mendoza",
-  rif: "J-12345678-9",
-  address: "Av. Francisco de Miranda, Caracas, Venezuela",
-  phone: "+58 212-555-1234",
-  email: "contacto@odontoflow.ve",
 };
 
 export function TreatmentPlan({ patient }: { patient: Patient }) {

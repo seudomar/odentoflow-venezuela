@@ -15,6 +15,7 @@ import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as FinanzasRouteImport } from './routes/finanzas'
 import { Route as EspecialistasRouteImport } from './routes/especialistas'
+import { Route as ConfiguracionRouteImport } from './routes/configuracion'
 import { Route as ComisionesRouteImport } from './routes/comisiones'
 import { Route as CitasRouteImport } from './routes/citas'
 import { Route as IndexRouteImport } from './routes/index'
@@ -51,6 +52,11 @@ const EspecialistasRoute = EspecialistasRouteImport.update({
   path: '/especialistas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfiguracionRoute = ConfiguracionRouteImport.update({
+  id: '/configuracion',
+  path: '/configuracion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComisionesRoute = ComisionesRouteImport.update({
   id: '/comisiones',
   path: '/comisiones',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/citas': typeof CitasRoute
   '/comisiones': typeof ComisionesRoute
+  '/configuracion': typeof ConfiguracionRoute
   '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
   '/landing': typeof LandingRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/citas': typeof CitasRoute
   '/comisiones': typeof ComisionesRoute
+  '/configuracion': typeof ConfiguracionRoute
   '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
   '/landing': typeof LandingRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/citas': typeof CitasRoute
   '/comisiones': typeof ComisionesRoute
+  '/configuracion': typeof ConfiguracionRoute
   '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
   '/landing': typeof LandingRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/citas'
     | '/comisiones'
+    | '/configuracion'
     | '/especialistas'
     | '/finanzas'
     | '/landing'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/citas'
     | '/comisiones'
+    | '/configuracion'
     | '/especialistas'
     | '/finanzas'
     | '/landing'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/citas'
     | '/comisiones'
+    | '/configuracion'
     | '/especialistas'
     | '/finanzas'
     | '/landing'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CitasRoute: typeof CitasRoute
   ComisionesRoute: typeof ComisionesRoute
+  ConfiguracionRoute: typeof ConfiguracionRoute
   EspecialistasRoute: typeof EspecialistasRoute
   FinanzasRoute: typeof FinanzasRoute
   LandingRoute: typeof LandingRoute
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EspecialistasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configuracion': {
+      id: '/configuracion'
+      path: '/configuracion'
+      fullPath: '/configuracion'
+      preLoaderRoute: typeof ConfiguracionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/comisiones': {
       id: '/comisiones'
       path: '/comisiones'
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CitasRoute: CitasRoute,
   ComisionesRoute: ComisionesRoute,
+  ConfiguracionRoute: ConfiguracionRoute,
   EspecialistasRoute: EspecialistasRoute,
   FinanzasRoute: FinanzasRoute,
   LandingRoute: LandingRoute,
