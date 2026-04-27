@@ -430,8 +430,54 @@ function PresupuestoSection({ rate }: { rate: number }) {
           })}
         </div>
 
-        <Button variant="outline" onClick={addItem} className="w-full gap-2">
-          <Plus className="h-4 w-4" /> Agregar servicio
+        {items.length === 0 && (
+          <div className="rounded-lg border-2 border-dashed border-border/60 p-8 text-center">
+            <FileText className="mx-auto h-7 w-7 text-muted-foreground/50" />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Selecciona un servicio del catálogo para empezar el presupuesto.
+            </p>
+          </div>
+        )}
+
+        {/* Catálogo de servicios predefinidos */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Servicios predefinidos
+            </Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              onClick={() => setShowCatalog((v) => !v)}
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              {showCatalog ? "Ocultar" : "Editar precios"}
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {services.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => addFromCatalog(s.id)}
+                className="group inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-all hover:border-primary hover:bg-primary/5 hover:shadow-sm"
+              >
+                <Plus className="h-3 w-3 text-primary" />
+                <span>{s.name}</span>
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
+                  {fmtUSD(s.priceUSD)}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {showCatalog && <CatalogEditor />}
+        </div>
+
+        <Button variant="outline" onClick={addCustom} className="w-full gap-2">
+          <Plus className="h-4 w-4" /> Agregar servicio personalizado
         </Button>
 
         {/* Totals */}
