@@ -64,6 +64,66 @@ const COUNTRY_CODES = [
 
 const SUPPORT_PHONE = "584140000000"; // número de soporte de OdontoFlow (sin +)
 
+const COMMON_PASSWORDS = new Set([
+  "12345678", "123456789", "1234567890", "password", "password1", "qwerty123",
+  "11111111", "00000000", "abc12345", "iloveyou", "admin123", "welcome1",
+]);
+
+const passwordSchema = z
+  .string()
+  .min(8, "Mínimo 8 caracteres")
+  .max(72, "Máximo 72 caracteres")
+  .regex(/[a-z]/, "Debe incluir una letra minúscula")
+  .regex(/[A-Z]/, "Debe incluir una letra mayúscula")
+  .regex(/[0-9]/, "Debe incluir un número")
+  .refine((v) => !COMMON_PASSWORDS.has(v.toLowerCase()), "Esta contraseña es muy común");
+
+const registroSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, "Ingresa tu nombre completo (mínimo 3 caracteres)")
+    .max(100, "Máximo 100 caracteres")
+    .regex(/^[\p{L}\s.'-]+$/u, "Solo letras, espacios y puntuación básica"),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("Correo electrónico no válido")
+    .max(255, "Máximo 255 caracteres"),
+  whatsapp: z
+    .string()
+    .regex(/^\d{7,15}$/, "Solo números (7 a 15 dígitos, sin espacios)"),
+  clinic: z
+    .string()
+    .trim()
+    .min(2, "Ingresa el nombre del consultorio")
+    .max(100, "Máximo 100 caracteres"),
+  password: passwordSchema,
+});
+
+type FieldErrors = Partial<Record<"name" | "email" | "whatsapp" | "clinic" | "password", string>>;
+
+function evaluatePasswordStrength(pwd: string) {
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 12) score++;
+  if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  if (COMMON_PASSWORDS.has(pwd.toLowerCase())) score = Math.min(score, 1);
+  const labels = ["Muy débil", "Débil", "Regular", "Buena", "Fuerte", "Excelente"];
+  const colors = [
+    "bg-destructive",
+    "bg-destructive",
+    "bg-amber-500",
+    "bg-amber-400",
+    "bg-emerald-500",
+    "bg-emerald-600",
+  ];
+  return { score, label: labels[score] ?? "Débil", color: colors[score] ?? "bg-destructive" };
+}
+
 function RegistroPage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -72,10 +132,15 @@ function RegistroPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [clinic, setClinic] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [createdName, setCreatedName] = useState("");
+
+  const strength = useMemo(() => evaluatePasswordStrength(password), [password]);
 
   const firstName = (createdName || name).trim().split(" ")[0] || "Doctor";
 
