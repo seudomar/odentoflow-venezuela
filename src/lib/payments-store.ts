@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 export type Currency = "USD" | "VEF";
-export type PaymentMethod = "Zelle" | "Efectivo" | "Pago Móvil";
+export type PaymentMethod = "Zelle" | "Efectivo" | "Pago Móvil" | "Transferencia" | "Binance";
 
 export interface Payment {
   id: string;
