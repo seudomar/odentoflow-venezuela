@@ -36,9 +36,9 @@ const PacientesIndexRoute = PacientesIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PacientesPatientIdRoute = PacientesPatientIdRouteImport.update({
-  id: '/$patientId',
-  path: '/$patientId',
-  getParentRoute: () => PacientesRoute,
+  id: '/pacientes/$patientId',
+  path: '/pacientes/$patientId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -86,6 +86,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CitasRoute: typeof CitasRoute
   FinanzasRoute: typeof FinanzasRoute
+  PacientesPatientIdRoute: typeof PacientesPatientIdRoute
   PacientesIndexRoute: typeof PacientesIndexRoute
 }
 
@@ -121,10 +122,10 @@ declare module '@tanstack/react-router' {
     }
     '/pacientes/$patientId': {
       id: '/pacientes/$patientId'
-      path: '/$patientId'
+      path: '/pacientes/$patientId'
       fullPath: '/pacientes/$patientId'
       preLoaderRoute: typeof PacientesPatientIdRouteImport
-      parentRoute: typeof PacientesRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -133,6 +134,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CitasRoute: CitasRoute,
   FinanzasRoute: FinanzasRoute,
+  PacientesPatientIdRoute: PacientesPatientIdRoute,
   PacientesIndexRoute: PacientesIndexRoute,
 }
 export const routeTree = rootRouteImport
