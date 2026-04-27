@@ -184,16 +184,21 @@ function PagosSection({ rate }: { rate: number }) {
 
             <div className="space-y-1">
               <Label>Método de pago</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {METHOD_OPTIONS.map((m) => {
-                  const Icon = m === "Zelle" ? Wallet : m === "Efectivo" ? HandCoins : Smartphone;
+                  const Icon =
+                    m === "Zelle" ? Wallet :
+                    m === "Efectivo" ? HandCoins :
+                    m === "Pago Móvil" ? Smartphone :
+                    m === "Transferencia" ? Landmark :
+                    Bitcoin;
                   const active = form.method === m;
                   return (
                     <button
                       key={m}
                       type="button"
                       onClick={() => set("method", m)}
-                      className={`flex flex-col items-center justify-center gap-1 rounded-lg border p-2.5 text-xs font-medium transition-all ${
+                      className={`flex flex-col items-center justify-center gap-1 rounded-lg border p-2.5 text-[11px] font-medium transition-all ${
                         active
                           ? "border-primary bg-primary/10 text-primary shadow-sm"
                           : "border-border text-muted-foreground hover:border-primary/40 hover:bg-muted/40"
