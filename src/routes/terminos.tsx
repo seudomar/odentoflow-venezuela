@@ -88,6 +88,6 @@ function TerminosPage() {
           </CardContent>
         </Card>
       </div>
-    </PatientLayout>
+    </div>
   );
 }
