@@ -144,5 +144,6 @@ function Dashboard() {
         </SidebarInset>
       </div>
     </SidebarProvider>
+    </AuthGuard>
   );
 }
