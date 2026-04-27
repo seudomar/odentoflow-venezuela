@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { authStore } from "@/lib/auth-store";
 
 export type AppointmentStatus = "pendiente" | "confirmado" | "completado" | "cancelado";
 
@@ -6,10 +8,10 @@ export interface Appointment {
   id: string;
   patientId?: string;
   patientName: string;
-  patientPhone: string; // E.164 sin "+", ej: 584141234567
+  patientPhone: string;
   treatment: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:mm
+  date: string;
+  time: string;
   status: AppointmentStatus;
   notes?: string;
   paymentAccountId?: string;
@@ -22,40 +24,111 @@ export const STATUS_META: Record<AppointmentStatus, { label: string; color: stri
   cancelado: { label: "Cancelado", color: "oklch(0.55 0.22 25)", bg: "oklch(0.6 0.22 25 / 0.15)" },
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
-const inDays = (d: number) => {
-  const dt = new Date();
-  dt.setDate(dt.getDate() + d);
-  return dt.toISOString().slice(0, 10);
+type DBAppt = {
+  id: string;
+  patient_id: string | null;
+  patient_name: string;
+  patient_phone: string;
+  treatment: string;
+  appt_date: string;
+  appt_time: string;
+  status: AppointmentStatus;
+  notes: string | null;
+  payment_account_id: string | null;
 };
 
-let appointments: Appointment[] = [
-  { id: "a1", patientId: "p1", patientName: "María González", patientPhone: "584141234567", treatment: "Limpieza dental", date: today(), time: "09:00", status: "confirmado" },
-  { id: "a2", patientId: "p2", patientName: "Carlos Pérez", patientPhone: "584127654321", treatment: "Endodoncia · Sesión 2", date: today(), time: "10:30", status: "confirmado" },
-  { id: "a3", patientId: "p3", patientName: "Ana Rodríguez", patientPhone: "584249988776", treatment: "Consulta inicial", date: today(), time: "12:00", status: "pendiente" },
-  { id: "a4", patientId: "p4", patientName: "Luis Hernández", patientPhone: "584163344556", treatment: "Blanqueamiento", date: today(), time: "14:30", status: "pendiente" },
-  { id: "a5", patientName: "Sofía Martínez", patientPhone: "584145556677", treatment: "Ortodoncia · Control", date: today(), time: "16:00", status: "confirmado" },
-  { id: "a6", patientId: "p1", patientName: "María González", patientPhone: "584141234567", treatment: "Control post-limpieza", date: inDays(1), time: "11:00", status: "pendiente" },
-  { id: "a7", patientId: "p2", patientName: "Carlos Pérez", patientPhone: "584127654321", treatment: "Endodoncia · Sesión 3", date: inDays(2), time: "09:30", status: "confirmado" },
-  { id: "a8", patientName: "Pedro Linares", patientPhone: "584142223344", treatment: "Extracción", date: inDays(3), time: "15:00", status: "pendiente" },
-];
+function fromDB(a: DBAppt): Appointment {
+  return {
+    id: a.id,
+    patientId: a.patient_id ?? undefined,
+    patientName: a.patient_name,
+    patientPhone: a.patient_phone,
+    treatment: a.treatment,
+    date: a.appt_date,
+    time: a.appt_time?.slice(0, 5) ?? "",
+    status: a.status,
+    notes: a.notes ?? undefined,
+    paymentAccountId: a.payment_account_id ?? undefined,
+  };
+}
 
+let appointments: Appointment[] = [];
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
+async function fetchAll() {
+  const { clinicId } = authStore.get();
+  if (!clinicId) { appointments = []; emit(); return; }
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("*")
+    .eq("clinic_id", clinicId)
+    .order("appt_date", { ascending: true })
+    .order("appt_time", { ascending: true });
+  if (error) { console.error("appointments.fetchAll", error); return; }
+  appointments = (data ?? []).map((d) => fromDB(d as DBAppt));
+  emit();
+}
+
+let lastClinicId: string | null = null;
+authStore.subscribe(() => {
+  const { clinicId } = authStore.get();
+  if (clinicId !== lastClinicId) {
+    lastClinicId = clinicId;
+    appointments = [];
+    emit();
+    if (clinicId) fetchAll();
+  }
+});
+
 export const appointmentsStore = {
   getAll: () => appointments,
-  add: (a: Omit<Appointment, "id">) => {
-    appointments = [...appointments, { ...a, id: `a${Date.now()}` }];
+  refresh: fetchAll,
+  add: async (a: Omit<Appointment, "id">) => {
+    const { clinicId } = authStore.get();
+    if (!clinicId) throw new Error("Sin clínica activa");
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert({
+        clinic_id: clinicId,
+        patient_id: a.patientId ?? null,
+        patient_name: a.patientName,
+        patient_phone: a.patientPhone,
+        treatment: a.treatment,
+        appt_date: a.date,
+        appt_time: a.time,
+        status: a.status,
+        notes: a.notes ?? null,
+        payment_account_id: a.paymentAccountId ?? null,
+      })
+      .select()
+      .single();
+    if (error) { console.error(error); throw error; }
+    appointments = [...appointments, fromDB(data as DBAppt)].sort((x, y) =>
+      (x.date + x.time).localeCompare(y.date + y.time),
+    );
     emit();
   },
-  update: (id: string, patch: Partial<Appointment>) => {
+  update: async (id: string, patch: Partial<Appointment>) => {
+    const dbPatch: Record<string, unknown> = {};
+    if (patch.patientId !== undefined) dbPatch.patient_id = patch.patientId ?? null;
+    if (patch.patientName !== undefined) dbPatch.patient_name = patch.patientName;
+    if (patch.patientPhone !== undefined) dbPatch.patient_phone = patch.patientPhone;
+    if (patch.treatment !== undefined) dbPatch.treatment = patch.treatment;
+    if (patch.date !== undefined) dbPatch.appt_date = patch.date;
+    if (patch.time !== undefined) dbPatch.appt_time = patch.time;
+    if (patch.status !== undefined) dbPatch.status = patch.status;
+    if (patch.notes !== undefined) dbPatch.notes = patch.notes ?? null;
+    if (patch.paymentAccountId !== undefined) dbPatch.payment_account_id = patch.paymentAccountId ?? null;
     appointments = appointments.map((a) => (a.id === id ? { ...a, ...patch } : a));
     emit();
+    const { error } = await supabase.from("appointments").update(dbPatch).eq("id", id);
+    if (error) console.error("appointments.update", error);
   },
-  remove: (id: string) => {
+  remove: async (id: string) => {
     appointments = appointments.filter((a) => a.id !== id);
     emit();
+    await supabase.from("appointments").delete().eq("id", id);
   },
   subscribe: (l: () => void) => {
     listeners.add(l);
@@ -64,11 +137,7 @@ export const appointmentsStore = {
 };
 
 export function useAppointments() {
-  return useSyncExternalStore(
-    appointmentsStore.subscribe,
-    () => appointments,
-    () => appointments,
-  );
+  return useSyncExternalStore(appointmentsStore.subscribe, () => appointments, () => appointments);
 }
 
 export function buildWhatsAppLink(a: Appointment) {
