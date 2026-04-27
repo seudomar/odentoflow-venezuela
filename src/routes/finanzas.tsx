@@ -50,6 +50,7 @@ import {
   type PaymentAccount,
 } from "@/lib/payment-accounts-store";
 import { Switch } from "@/components/ui/switch";
+import { servicesStore, useServices, type Service } from "@/lib/services-store";
 
 export const Route = createFileRoute("/finanzas")({
   head: () => ({
