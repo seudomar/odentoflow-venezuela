@@ -73,6 +73,10 @@ function RegistroPage() {
       toast.error("Debes aceptar los Términos y Condiciones para continuar.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
     setSubmitting(true);
     try {
       const fullPhone = `${countryCode}${whatsapp.replace(/\D/g, "")}`;
@@ -91,9 +95,17 @@ function RegistroPage() {
       if (error) throw error;
       setCreatedName(name);
       setWelcomeOpen(true);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "No se pudo crear la cuenta.";
-      toast.error(msg);
+    } catch (err: unknown) {
+      const e = err as { code?: string; message?: string };
+      let msg = e?.message || "No se pudo crear la cuenta.";
+      if (e?.code === "weak_password" || /pwned|weak.?password/i.test(msg)) {
+        msg = "Esa contraseña es muy común y aparece en filtraciones públicas. Usa una más segura: combina mayúsculas, minúsculas, números y un símbolo (mínimo 8 caracteres).";
+      } else if (e?.code === "user_already_exists" || /already registered|already exists/i.test(msg)) {
+        msg = "Ya existe una cuenta con ese correo. Intenta iniciar sesión.";
+      } else if (/invalid.*email/i.test(msg)) {
+        msg = "El correo electrónico no es válido.";
+      }
+      toast.error(msg, { duration: 6000 });
     } finally {
       setSubmitting(false);
     }
@@ -188,9 +200,12 @@ function RegistroPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
-                placeholder="Mínimo 6 caracteres"
+                minLength={8}
+                placeholder="Mínimo 8 caracteres"
               />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Usa al menos 8 caracteres combinando letras, números y un símbolo. Evita contraseñas comunes como "123456".
+              </p>
             </div>
 
             <div className="flex items-start gap-2.5 rounded-lg border bg-muted/30 p-3">
