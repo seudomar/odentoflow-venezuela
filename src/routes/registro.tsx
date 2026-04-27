@@ -144,43 +144,64 @@ function RegistroPage() {
 
   const firstName = (createdName || name).trim().split(" ")[0] || "Doctor";
 
+  const validateField = (field: keyof FieldErrors, value: string) => {
+    const result = registroSchema.shape[field].safeParse(value);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: result.success ? undefined : result.error.issues[0]?.message,
+    }));
+  };
+
+  const markTouched = (field: string) => setTouched((p) => ({ ...p, [field]: true }));
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accepted) {
       toast.error("Debes aceptar los Términos y Condiciones para continuar.");
       return;
     }
-    if (password.length < 8) {
-      toast.error("La contraseña debe tener al menos 8 caracteres.");
+    const parsed = registroSchema.safeParse({ name, email, whatsapp, clinic, password });
+    if (!parsed.success) {
+      const next: FieldErrors = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as keyof FieldErrors;
+        if (key && !next[key]) next[key] = issue.message;
+      }
+      setErrors(next);
+      setTouched({ name: true, email: true, whatsapp: true, clinic: true, password: true });
+      toast.error("Revisa los datos: hay campos con errores.");
       return;
     }
     setSubmitting(true);
     try {
-      const fullPhone = `${countryCode}${whatsapp.replace(/\D/g, "")}`;
+      const fullPhone = `${countryCode}${parsed.data.whatsapp}`;
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: parsed.data.email,
+        password: parsed.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: name,
-            clinic_name: clinic,
+            full_name: parsed.data.name,
+            clinic_name: parsed.data.clinic,
             whatsapp: fullPhone,
           },
         },
       });
       if (error) throw error;
-      setCreatedName(name);
+      setCreatedName(parsed.data.name);
       setWelcomeOpen(true);
     } catch (err: unknown) {
       const e = err as { code?: string; message?: string };
       let msg = e?.message || "No se pudo crear la cuenta.";
       if (e?.code === "weak_password" || /pwned|weak.?password/i.test(msg)) {
-        msg = "Esa contraseña es muy común y aparece en filtraciones públicas. Usa una más segura: combina mayúsculas, minúsculas, números y un símbolo (mínimo 8 caracteres).";
+        msg = "Esa contraseña aparece en filtraciones públicas conocidas. Usa una más segura combinando mayúsculas, minúsculas, números y un símbolo.";
+        setErrors((p) => ({ ...p, password: "Contraseña filtrada — elige otra" }));
       } else if (e?.code === "user_already_exists" || /already registered|already exists/i.test(msg)) {
         msg = "Ya existe una cuenta con ese correo. Intenta iniciar sesión.";
+        setErrors((p) => ({ ...p, email: "Ese correo ya está registrado" }));
       } else if (/invalid.*email/i.test(msg)) {
         msg = "El correo electrónico no es válido.";
+        setErrors((p) => ({ ...p, email: "Correo no válido" }));
       }
       toast.error(msg, { duration: 6000 });
     } finally {
