@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TratamientosRouteImport } from './routes/tratamientos'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as FinanzasRouteImport } from './routes/finanzas'
 import { Route as EspecialistasRouteImport } from './routes/especialistas'
 import { Route as ComisionesRouteImport } from './routes/comisiones'
@@ -33,6 +34,11 @@ const TerminosRoute = TerminosRouteImport.update({
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanzasRoute = FinanzasRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/comisiones': typeof ComisionesRoute
   '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
+  '/landing': typeof LandingRoute
   '/registro': typeof RegistroRoute
   '/terminos': typeof TerminosRoute
   '/tratamientos': typeof TratamientosRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/comisiones': typeof ComisionesRoute
   '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
+  '/landing': typeof LandingRoute
   '/registro': typeof RegistroRoute
   '/terminos': typeof TerminosRoute
   '/tratamientos': typeof TratamientosRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/comisiones': typeof ComisionesRoute
   '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
+  '/landing': typeof LandingRoute
   '/registro': typeof RegistroRoute
   '/terminos': typeof TerminosRoute
   '/tratamientos': typeof TratamientosRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/comisiones'
     | '/especialistas'
     | '/finanzas'
+    | '/landing'
     | '/registro'
     | '/terminos'
     | '/tratamientos'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/comisiones'
     | '/especialistas'
     | '/finanzas'
+    | '/landing'
     | '/registro'
     | '/terminos'
     | '/tratamientos'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/comisiones'
     | '/especialistas'
     | '/finanzas'
+    | '/landing'
     | '/registro'
     | '/terminos'
     | '/tratamientos'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   ComisionesRoute: typeof ComisionesRoute
   EspecialistasRoute: typeof EspecialistasRoute
   FinanzasRoute: typeof FinanzasRoute
+  LandingRoute: typeof LandingRoute
   RegistroRoute: typeof RegistroRoute
   TerminosRoute: typeof TerminosRoute
   TratamientosRoute: typeof TratamientosRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/registro'
       fullPath: '/registro'
       preLoaderRoute: typeof RegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/finanzas': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   ComisionesRoute: ComisionesRoute,
   EspecialistasRoute: EspecialistasRoute,
   FinanzasRoute: FinanzasRoute,
+  LandingRoute: LandingRoute,
   RegistroRoute: RegistroRoute,
   TerminosRoute: TerminosRoute,
   TratamientosRoute: TratamientosRoute,
