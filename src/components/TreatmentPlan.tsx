@@ -16,9 +16,10 @@ import {
   TREATMENT_STATUSES, type TreatmentStatus,
 } from "@/lib/treatment-plans-store";
 import { useServices } from "@/lib/services-store";
+import { useSpecialists } from "@/lib/specialists-store";
 import { useBcvRate } from "@/lib/rate-store";
 import type { Patient } from "@/lib/patients-store";
-import { Plus, Trash2, Printer, FileDown, ClipboardList } from "lucide-react";
+import { Plus, Trash2, Printer, FileDown, ClipboardList, Stethoscope } from "lucide-react";
 
 const STATUS_STYLE: Record<TreatmentStatus, { color: string; bg: string }> = {
   "Pendiente": { color: "oklch(0.6 0.18 60)", bg: "oklch(0.6 0.18 60 / 0.15)" },
@@ -134,6 +135,10 @@ export function TreatmentPlan({ patient }: { patient: Patient }) {
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <SpecialistSelect
+                      value={it.specialistId}
+                      onChange={(v) => treatmentPlansStore.update(it.id, { specialistId: v || undefined })}
+                    />
                     <Input
                       type="number"
                       min="0"
@@ -326,5 +331,27 @@ export function StatusBadge({ status }: { status: TreatmentStatus }) {
     <Badge variant="outline" style={{ color: s.color, borderColor: `color-mix(in oklab, ${s.color} 35%, transparent)`, backgroundColor: s.bg }}>
       {status}
     </Badge>
+  );
+}
+
+function SpecialistSelect({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
+  const specialists = useSpecialists().filter((s) => s.active);
+  return (
+    <Select value={value ?? "__none__"} onValueChange={(v) => onChange(v === "__none__" ? "" : v)}>
+      <SelectTrigger className="h-8 w-44 text-xs">
+        <span className="flex items-center gap-1.5 truncate">
+          <Stethoscope className="h-3 w-3 shrink-0 text-muted-foreground" />
+          <SelectValue placeholder="Sin asignar" />
+        </span>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__">Sin asignar</SelectItem>
+        {specialists.map((s) => (
+          <SelectItem key={s.id} value={s.id}>
+            {s.name} ({s.commissionPct}%)
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

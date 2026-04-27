@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Calendar, DollarSign, FileText, Settings, Stethoscope } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, DollarSign, FileText, Settings, Stethoscope, UserCog, Wallet } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Sidebar,
@@ -18,6 +18,8 @@ const items = [
   { title: "Citas", url: "/citas", icon: Calendar },
   { title: "Pacientes", url: "/pacientes", icon: Users },
   { title: "Tratamientos", url: "/tratamientos", icon: FileText },
+  { title: "Especialistas", url: "/especialistas", icon: UserCog },
+  { title: "Comisiones", url: "/comisiones", icon: Wallet },
   { title: "Finanzas", url: "/finanzas", icon: DollarSign },
   { title: "Configuración", url: "/configuracion", icon: Settings },
 ];
