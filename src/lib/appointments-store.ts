@@ -122,7 +122,7 @@ export const appointmentsStore = {
     if (patch.paymentAccountId !== undefined) dbPatch.payment_account_id = patch.paymentAccountId ?? null;
     appointments = appointments.map((a) => (a.id === id ? { ...a, ...patch } : a));
     emit();
-    const { error } = await supabase.from("appointments").update(dbPatch).eq("id", id);
+    const { error } = await supabase.from("appointments").update(dbPatch as never).eq("id", id);
     if (error) console.error("appointments.update", error);
   },
   remove: async (id: string) => {

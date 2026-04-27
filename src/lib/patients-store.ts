@@ -161,7 +161,7 @@ export const patientsStore = {
     if (patch.files !== undefined) dbPatch.files = patch.files;
     patients = patients.map((p) => (p.id === id ? { ...p, ...patch } : p));
     emit();
-    const { error } = await supabase.from("patients").update(dbPatch).eq("id", id);
+    const { error } = await supabase.from("patients").update(dbPatch as never).eq("id", id);
     if (error) console.error("patients.update", error);
   },
   setTooth: async (id: string, tooth: number, status: ToothStatus) => {
@@ -170,7 +170,7 @@ export const patientsStore = {
     const newTeeth = { ...target.teeth, [tooth]: status };
     patients = patients.map((p) => (p.id === id ? { ...p, teeth: newTeeth } : p));
     emit();
-    const { error } = await supabase.from("patients").update({ teeth: newTeeth }).eq("id", id);
+    const { error } = await supabase.from("patients").update({ teeth: newTeeth as never }).eq("id", id);
     if (error) console.error("patients.setTooth", error);
   },
   addFile: async (id: string, file: PatientFile) => {
@@ -179,7 +179,7 @@ export const patientsStore = {
     const newFiles = [file, ...target.files];
     patients = patients.map((p) => (p.id === id ? { ...p, files: newFiles } : p));
     emit();
-    await supabase.from("patients").update({ files: newFiles }).eq("id", id);
+    await supabase.from("patients").update({ files: newFiles as never }).eq("id", id);
   },
   removeFile: async (id: string, fileId: string) => {
     const target = patients.find((p) => p.id === id);
@@ -187,7 +187,7 @@ export const patientsStore = {
     const newFiles = target.files.filter((f) => f.id !== fileId);
     patients = patients.map((p) => (p.id === id ? { ...p, files: newFiles } : p));
     emit();
-    await supabase.from("patients").update({ files: newFiles }).eq("id", id);
+    await supabase.from("patients").update({ files: newFiles as never }).eq("id", id);
   },
   subscribe: (l: () => void) => {
     listeners.add(l);
