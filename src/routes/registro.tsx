@@ -73,6 +73,10 @@ function RegistroPage() {
       toast.error("Debes aceptar los Términos y Condiciones para continuar.");
       return;
     }
+    if (password.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
     setSubmitting(true);
     try {
       const fullPhone = `${countryCode}${whatsapp.replace(/\D/g, "")}`;
@@ -91,9 +95,17 @@ function RegistroPage() {
       if (error) throw error;
       setCreatedName(name);
       setWelcomeOpen(true);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "No se pudo crear la cuenta.";
-      toast.error(msg);
+    } catch (err: unknown) {
+      const e = err as { code?: string; message?: string };
+      let msg = e?.message || "No se pudo crear la cuenta.";
+      if (e?.code === "weak_password" || /pwned|weak.?password/i.test(msg)) {
+        msg = "Esa contraseña es muy común y aparece en filtraciones públicas. Usa una más segura: combina mayúsculas, minúsculas, números y un símbolo (mínimo 8 caracteres).";
+      } else if (e?.code === "user_already_exists" || /already registered|already exists/i.test(msg)) {
+        msg = "Ya existe una cuenta con ese correo. Intenta iniciar sesión.";
+      } else if (/invalid.*email/i.test(msg)) {
+        msg = "El correo electrónico no es válido.";
+      }
+      toast.error(msg, { duration: 6000 });
     } finally {
       setSubmitting(false);
     }
