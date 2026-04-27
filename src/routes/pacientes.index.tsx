@@ -23,7 +23,7 @@ import {
 import { Search, Plus, ChevronRight, Phone, Mail } from "lucide-react";
 import { usePatients, patientsStore } from "@/lib/patients-store";
 
-export const Route = createFileRoute("/pacientes")({
+export const Route = createFileRoute("/pacientes/")({
   head: () => ({
     meta: [
       { title: "Pacientes — OdontoFlow" },
