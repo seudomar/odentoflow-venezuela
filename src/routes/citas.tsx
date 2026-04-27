@@ -233,6 +233,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 function NewAppointmentDialog({ defaultDate, onDone }: { defaultDate: string; onDone: () => void }) {
+  const accounts = usePaymentAccounts().filter((a) => a.active);
   const [form, setForm] = useState({
     patientName: "",
     patientPhone: "",
@@ -240,18 +241,25 @@ function NewAppointmentDialog({ defaultDate, onDone }: { defaultDate: string; on
     date: defaultDate,
     time: "09:00",
     status: "pendiente" as AppointmentStatus,
+    paymentAccountId: "",
   });
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const selectedAccount = accounts.find((a) => a.id === form.paymentAccountId);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.patientName.trim() || !form.treatment.trim()) return;
-    appointmentsStore.add(form);
+    const { paymentAccountId, ...rest } = form;
+    appointmentsStore.add({
+      ...rest,
+      paymentAccountId: paymentAccountId || undefined,
+    });
     onDone();
   };
 
   return (
-    <DialogContent className="max-w-md">
+    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Nueva cita</DialogTitle>
       </DialogHeader>
@@ -293,6 +301,36 @@ function NewAppointmentDialog({ defaultDate, onDone }: { defaultDate: string; on
             </SelectContent>
           </Select>
         </div>
+
+        <div className="sm:col-span-2 space-y-1">
+          <Label>Método de pago</Label>
+          <Select value={form.paymentAccountId || "none"} onValueChange={(v) => set("paymentAccountId", v === "none" ? "" : v)}>
+            <SelectTrigger><SelectValue placeholder="Seleccionar (opcional)" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sin definir</SelectItem>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.label} · {a.method}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {accounts.length === 0 && (
+            <p className="text-[11px] text-muted-foreground">
+              No hay métodos configurados. Agrégalos en <span className="font-medium text-primary">Finanzas → Métodos</span>.
+            </p>
+          )}
+        </div>
+
+        {selectedAccount && (
+          <div className="sm:col-span-2 rounded-lg border bg-muted/30 p-3">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Datos para el pago
+            </p>
+            <AccountDetails a={selectedAccount} />
+          </div>
+        )}
+
         <DialogFooter className="sm:col-span-2">
           <Button type="button" variant="ghost" onClick={onDone}>Cancelar</Button>
           <Button type="submit">Crear cita</Button>
