@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TratamientosRouteImport } from './routes/tratamientos'
 import { Route as FinanzasRouteImport } from './routes/finanzas'
+import { Route as EspecialistasRouteImport } from './routes/especialistas'
+import { Route as ComisionesRouteImport } from './routes/comisiones'
 import { Route as CitasRouteImport } from './routes/citas'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PacientesIndexRouteImport } from './routes/pacientes.index'
@@ -24,6 +26,16 @@ const TratamientosRoute = TratamientosRouteImport.update({
 const FinanzasRoute = FinanzasRouteImport.update({
   id: '/finanzas',
   path: '/finanzas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EspecialistasRoute = EspecialistasRouteImport.update({
+  id: '/especialistas',
+  path: '/especialistas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComisionesRoute = ComisionesRouteImport.update({
+  id: '/comisiones',
+  path: '/comisiones',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CitasRoute = CitasRouteImport.update({
@@ -50,6 +62,8 @@ const PacientesPatientIdRoute = PacientesPatientIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/citas': typeof CitasRoute
+  '/comisiones': typeof ComisionesRoute
+  '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
   '/tratamientos': typeof TratamientosRoute
   '/pacientes/$patientId': typeof PacientesPatientIdRoute
@@ -58,6 +72,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/citas': typeof CitasRoute
+  '/comisiones': typeof ComisionesRoute
+  '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
   '/tratamientos': typeof TratamientosRoute
   '/pacientes/$patientId': typeof PacientesPatientIdRoute
@@ -67,6 +83,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/citas': typeof CitasRoute
+  '/comisiones': typeof ComisionesRoute
+  '/especialistas': typeof EspecialistasRoute
   '/finanzas': typeof FinanzasRoute
   '/tratamientos': typeof TratamientosRoute
   '/pacientes/$patientId': typeof PacientesPatientIdRoute
@@ -77,6 +95,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/citas'
+    | '/comisiones'
+    | '/especialistas'
     | '/finanzas'
     | '/tratamientos'
     | '/pacientes/$patientId'
@@ -85,6 +105,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/citas'
+    | '/comisiones'
+    | '/especialistas'
     | '/finanzas'
     | '/tratamientos'
     | '/pacientes/$patientId'
@@ -93,6 +115,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/citas'
+    | '/comisiones'
+    | '/especialistas'
     | '/finanzas'
     | '/tratamientos'
     | '/pacientes/$patientId'
@@ -102,6 +126,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CitasRoute: typeof CitasRoute
+  ComisionesRoute: typeof ComisionesRoute
+  EspecialistasRoute: typeof EspecialistasRoute
   FinanzasRoute: typeof FinanzasRoute
   TratamientosRoute: typeof TratamientosRoute
   PacientesPatientIdRoute: typeof PacientesPatientIdRoute
@@ -122,6 +148,20 @@ declare module '@tanstack/react-router' {
       path: '/finanzas'
       fullPath: '/finanzas'
       preLoaderRoute: typeof FinanzasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/especialistas': {
+      id: '/especialistas'
+      path: '/especialistas'
+      fullPath: '/especialistas'
+      preLoaderRoute: typeof EspecialistasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comisiones': {
+      id: '/comisiones'
+      path: '/comisiones'
+      fullPath: '/comisiones'
+      preLoaderRoute: typeof ComisionesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/citas': {
@@ -158,6 +198,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CitasRoute: CitasRoute,
+  ComisionesRoute: ComisionesRoute,
+  EspecialistasRoute: EspecialistasRoute,
   FinanzasRoute: FinanzasRoute,
   TratamientosRoute: TratamientosRoute,
   PacientesPatientIdRoute: PacientesPatientIdRoute,
