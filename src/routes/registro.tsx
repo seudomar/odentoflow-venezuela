@@ -439,3 +439,38 @@ function RegistroPage() {
     </div>
   );
 }
+
+function Field({
+  label,
+  error,
+  hint,
+  children,
+}: {
+  label: string;
+  error?: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <Label className="mb-1 block text-xs">{label}</Label>
+      {children}
+      {error ? (
+        <p className="mt-1 flex items-center gap-1 text-[11px] text-destructive">
+          <AlertCircle className="h-3 w-3" /> {error}
+        </p>
+      ) : hint ? (
+        <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function Requisito({ ok, text }: { ok: boolean; text: string }) {
+  return (
+    <li className={cn("flex items-center gap-1", ok ? "text-emerald-600" : "text-muted-foreground")}>
+      {ok ? <CheckCircle2 className="h-3 w-3" /> : <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />}
+      {text}
+    </li>
+  );
+}
