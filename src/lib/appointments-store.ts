@@ -12,6 +12,7 @@ export interface Appointment {
   time: string; // HH:mm
   status: AppointmentStatus;
   notes?: string;
+  paymentAccountId?: string;
 }
 
 export const STATUS_META: Record<AppointmentStatus, { label: string; color: string; bg: string }> = {
