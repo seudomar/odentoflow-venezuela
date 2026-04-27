@@ -2,9 +2,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { useBcvRate } from "@/lib/rate-store";
 
 export function PatientLayout({ children }: { children: ReactNode }) {
-  const [rate, setRate] = useState(36.5);
+  const [rate, setRate] = useBcvRate();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -20,3 +21,4 @@ export function PatientLayout({ children }: { children: ReactNode }) {
     </SidebarProvider>
   );
 }
+
