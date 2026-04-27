@@ -26,6 +26,10 @@ import {
   HandCoins,
   Calculator,
   Printer,
+  CreditCard,
+  Pencil,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { useBcvRate } from "@/lib/rate-store";
 import {
@@ -35,6 +39,12 @@ import {
   type Currency,
   type PaymentMethod,
 } from "@/lib/payments-store";
+import {
+  paymentAccountsStore,
+  usePaymentAccounts,
+  type PaymentAccount,
+} from "@/lib/payment-accounts-store";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/finanzas")({
   head: () => ({
@@ -65,9 +75,10 @@ function FinanzasPage() {
         </div>
 
         <Tabs defaultValue="pagos" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+          <TabsList className="grid w-full grid-cols-3 sm:w-auto">
             <TabsTrigger value="pagos" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Pagos</TabsTrigger>
             <TabsTrigger value="presupuesto" className="gap-1.5"><FileText className="h-3.5 w-3.5" /> Presupuesto</TabsTrigger>
+            <TabsTrigger value="metodos" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Métodos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pagos">
@@ -76,6 +87,10 @@ function FinanzasPage() {
 
           <TabsContent value="presupuesto">
             <PresupuestoSection rate={rate} />
+          </TabsContent>
+
+          <TabsContent value="metodos">
+            <MetodosSection />
           </TabsContent>
         </Tabs>
       </div>
