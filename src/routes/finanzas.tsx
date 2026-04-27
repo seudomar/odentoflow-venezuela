@@ -814,7 +814,7 @@ function CatalogEditor() {
     const name = newName.trim();
     const price = parseFloat(newPrice);
     if (!name || isNaN(price) || price < 0) return;
-    servicesStore.add({ name: name.slice(0, 120), priceUSD: price });
+    servicesStore.add({ name: name.slice(0, 120), priceUSD: price, category: "Otros" });
     setNewName("");
     setNewPrice("");
   };
