@@ -4,14 +4,24 @@ import type { PaymentMethod } from "./payments-store";
 export interface PaymentAccount {
   id: string;
   method: PaymentMethod;
-  label: string; // Ej: "Zelle Principal"
-  holder: string; // Titular
-  // Campos opcionales según método
-  email?: string; // Zelle
-  bank?: string; // Pago Móvil
-  phone?: string; // Pago Móvil
-  idNumber?: string; // Cédula/RIF (Pago Móvil)
-  instructions?: string; // Efectivo u otros
+  label: string;
+  holder: string;
+  // Zelle
+  email?: string;
+  // Pago Móvil
+  bank?: string;
+  phone?: string;
+  idNumber?: string;
+  // Transferencia bancaria
+  accountNumber?: string;
+  accountType?: "Corriente" | "Ahorro";
+  swiftCode?: string;
+  // Binance
+  binanceId?: string;
+  binanceNetwork?: string;
+  binanceEmail?: string;
+  // Genérico
+  instructions?: string;
   active: boolean;
 }
 
@@ -36,6 +46,27 @@ let accounts: PaymentAccount[] = [
   },
   {
     id: "acc3",
+    method: "Transferencia",
+    label: "Cuenta Banesco",
+    holder: "Dr. Juan Pérez",
+    bank: "0134 - Banesco",
+    accountNumber: "0134-0000-00-0000000000",
+    accountType: "Corriente",
+    idNumber: "V-12.345.678",
+    active: true,
+  },
+  {
+    id: "acc4",
+    method: "Binance",
+    label: "Binance Pay",
+    holder: "Dr. Juan Pérez",
+    binanceId: "123456789",
+    binanceEmail: "pagos@odontoflow.com",
+    binanceNetwork: "USDT (BEP20)",
+    active: true,
+  },
+  {
+    id: "acc5",
     method: "Efectivo",
     label: "Efectivo en consultorio",
     holder: "Recepción",
