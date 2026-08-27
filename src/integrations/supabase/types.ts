@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -107,6 +107,77 @@ export type Database = {
             foreignKeyName: "clinic_members_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinic_settings: {
+        Row: {
+          address: string
+          admin_whatsapp: string
+          clinic_id: string
+          clinic_name: string
+          created_at: string
+          doctor_name: string
+          email: string
+          legal_note: string
+          logo_data_url: string
+          payment_instructions: string
+          phone: string
+          plan: string
+          plan_renews_at: string
+          rate_source: string
+          rate_value: number
+          rif: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          admin_whatsapp?: string
+          clinic_id: string
+          clinic_name?: string
+          created_at?: string
+          doctor_name?: string
+          email?: string
+          legal_note?: string
+          logo_data_url?: string
+          payment_instructions?: string
+          phone?: string
+          plan?: string
+          plan_renews_at?: string
+          rate_source?: string
+          rate_value?: number
+          rif?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          admin_whatsapp?: string
+          clinic_id?: string
+          clinic_name?: string
+          created_at?: string
+          doctor_name?: string
+          email?: string
+          legal_note?: string
+          logo_data_url?: string
+          payment_instructions?: string
+          phone?: string
+          plan?: string
+          plan_renews_at?: string
+          rate_source?: string
+          rate_value?: number
+          rif?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_settings_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: true
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -210,6 +281,80 @@ export type Database = {
           },
         ]
       }
+      payment_accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string | null
+          active: boolean
+          bank: string | null
+          binance_email: string | null
+          binance_id: string | null
+          binance_network: string | null
+          clinic_id: string
+          created_at: string
+          email: string | null
+          holder: string
+          id: string
+          id_number: string | null
+          instructions: string | null
+          label: string
+          method: Database["public"]["Enums"]["payment_method"]
+          phone: string | null
+          swift_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string | null
+          active?: boolean
+          bank?: string | null
+          binance_email?: string | null
+          binance_id?: string | null
+          binance_network?: string | null
+          clinic_id: string
+          created_at?: string
+          email?: string | null
+          holder?: string
+          id?: string
+          id_number?: string | null
+          instructions?: string | null
+          label: string
+          method: Database["public"]["Enums"]["payment_method"]
+          phone?: string | null
+          swift_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string | null
+          active?: boolean
+          bank?: string | null
+          binance_email?: string | null
+          binance_id?: string | null
+          binance_network?: string | null
+          clinic_id?: string
+          created_at?: string
+          email?: string | null
+          holder?: string
+          id?: string
+          id_number?: string | null
+          instructions?: string | null
+          label?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          phone?: string | null
+          swift_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_accounts_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -270,6 +415,168 @@ export type Database = {
           },
         ]
       }
+      services: {
+        Row: {
+          category: string
+          clinic_id: string
+          created_at: string
+          id: string
+          name: string
+          price_usd: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          clinic_id: string
+          created_at?: string
+          id?: string
+          name: string
+          price_usd?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          clinic_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          price_usd?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specialists: {
+        Row: {
+          active: boolean
+          clinic_id: string
+          commission_pct: number
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          specialty: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          clinic_id: string
+          commission_pct?: number
+          created_at?: string
+          email?: string
+          id?: string
+          name: string
+          phone?: string
+          specialty?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          clinic_id?: string
+          commission_pct?: number
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          specialty?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialists_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treatment_items: {
+        Row: {
+          clinic_id: string
+          commission_paid_at: string | null
+          commission_status: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          patient_id: string
+          price_usd: number
+          service_id: string | null
+          specialist_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          clinic_id: string
+          commission_paid_at?: string | null
+          commission_status?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          patient_id: string
+          price_usd?: number
+          service_id?: string | null
+          specialist_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          clinic_id?: string
+          commission_paid_at?: string | null
+          commission_status?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          price_usd?: number
+          service_id?: string | null
+          specialist_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treatment_items_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_items_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treatment_items_specialist_id_fkey"
+            columns: ["specialist_id"]
+            isOneToOne: false
+            referencedRelation: "specialists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -279,6 +586,7 @@ export type Database = {
         Args: { _clinic_id: string; _user_id: string }
         Returns: boolean
       }
+      seed_clinic_defaults: { Args: { _clinic_id: string }; Returns: undefined }
     }
     Enums: {
       appointment_status:

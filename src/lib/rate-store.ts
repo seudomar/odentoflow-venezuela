@@ -1,21 +1,21 @@
 import { useSyncExternalStore } from "react";
+import { clinicSettingsStore } from "@/lib/clinic-settings-store";
 
-let rate = 36.5;
-const listeners = new Set<() => void>();
-
+/**
+ * La tasa del día vive en la configuración del consultorio (nube).
+ * Este store es un alias reactivo para leer/escribir ese valor.
+ */
 export const rateStore = {
-  get: () => rate,
-  set: (v: number) => {
-    rate = v;
-    listeners.forEach((l) => l());
-  },
-  subscribe: (l: () => void) => {
-    listeners.add(l);
-    return () => listeners.delete(l);
-  },
+  get: () => clinicSettingsStore.get().rateValue,
+  set: (v: number) => clinicSettingsStore.set({ rateValue: v }),
+  subscribe: (l: () => void) => clinicSettingsStore.subscribe(l),
 };
 
 export function useBcvRate(): [number, (v: number) => void] {
-  const value = useSyncExternalStore(rateStore.subscribe, () => rate, () => rate);
+  const value = useSyncExternalStore(
+    clinicSettingsStore.subscribe,
+    () => clinicSettingsStore.get().rateValue,
+    () => clinicSettingsStore.get().rateValue,
+  );
   return [value, rateStore.set];
 }
