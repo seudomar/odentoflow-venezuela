@@ -157,11 +157,20 @@ export const treatmentPlansStore = {
   },
 };
 
+const byPatientCache = new Map<string, { src: TreatmentItem[]; out: TreatmentItem[] }>();
+function patientSnapshot(patientId: string) {
+  const cached = byPatientCache.get(patientId);
+  if (cached && cached.src === items) return cached.out;
+  const out = items.filter((i) => i.patientId === patientId);
+  byPatientCache.set(patientId, { src: items, out });
+  return out;
+}
+
 export function usePatientTreatments(patientId: string) {
   return useSyncExternalStore(
     treatmentPlansStore.subscribe,
-    () => items.filter((i) => i.patientId === patientId),
-    () => items.filter((i) => i.patientId === patientId),
+    () => patientSnapshot(patientId),
+    () => patientSnapshot(patientId),
   );
 }
 
