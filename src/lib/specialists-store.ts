@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { onClinicChange, currentClinicId } from "@/lib/clinic-sync";
 
 export interface Specialist {
   id: string;
@@ -10,30 +12,93 @@ export interface Specialist {
   active: boolean;
 }
 
-const DEFAULT: Specialist[] = [
-  { id: "sp1", name: "Dra. Laura Méndez", specialty: "Endodoncia", phone: "+58 414-1112233", email: "laura.m@odontoflow.ve", commissionPct: 40, active: true },
-  { id: "sp2", name: "Dr. Andrés Rivas", specialty: "Ortodoncia", phone: "+58 412-4445566", email: "andres.r@odontoflow.ve", commissionPct: 45, active: true },
-  { id: "sp3", name: "Dra. Sofía Caro", specialty: "Estética dental", phone: "+58 416-7778899", email: "sofia.c@odontoflow.ve", commissionPct: 50, active: true },
-];
+type DBSpecialist = {
+  id: string;
+  name: string;
+  specialty: string;
+  phone: string;
+  email: string;
+  commission_pct: string | number;
+  active: boolean;
+};
 
-let specialists: Specialist[] = [...DEFAULT];
+const num = (v: string | number) => (typeof v === "number" ? v : parseFloat(v));
+
+const fromDB = (s: DBSpecialist): Specialist => ({
+  id: s.id,
+  name: s.name,
+  specialty: s.specialty ?? "",
+  phone: s.phone ?? "",
+  email: s.email ?? "",
+  commissionPct: num(s.commission_pct),
+  active: s.active,
+});
+
+let specialists: Specialist[] = [];
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
+
+async function fetchAll() {
+  const clinicId = currentClinicId();
+  if (!clinicId) { specialists = []; emit(); return; }
+  const { data, error } = await supabase
+    .from("specialists")
+    .select("*")
+    .eq("clinic_id", clinicId)
+    .order("created_at", { ascending: true });
+  if (error) { console.error("specialists.fetchAll", error); return; }
+  specialists = (data ?? []).map((d) => fromDB(d as DBSpecialist));
+  emit();
+}
+
+onClinicChange((clinicId) => {
+  specialists = [];
+  emit();
+  if (clinicId) fetchAll();
+});
 
 export const specialistsStore = {
   getAll: () => specialists,
   get: (id: string) => specialists.find((s) => s.id === id),
-  add: (s: Omit<Specialist, "id">) => {
-    specialists = [...specialists, { ...s, id: `sp${Date.now()}` }];
+  refresh: fetchAll,
+  add: async (s: Omit<Specialist, "id">) => {
+    const clinicId = currentClinicId();
+    if (!clinicId) return;
+    const { data, error } = await supabase
+      .from("specialists")
+      .insert({
+        clinic_id: clinicId,
+        name: s.name,
+        specialty: s.specialty,
+        phone: s.phone,
+        email: s.email,
+        commission_pct: s.commissionPct,
+        active: s.active,
+      })
+      .select()
+      .single();
+    if (error) { console.error("specialists.add", error); return; }
+    specialists = [...specialists, fromDB(data as DBSpecialist)];
     emit();
   },
-  update: (id: string, patch: Partial<Specialist>) => {
+  update: async (id: string, patch: Partial<Specialist>) => {
     specialists = specialists.map((s) => (s.id === id ? { ...s, ...patch } : s));
     emit();
+    const dbPatch: Record<string, unknown> = {};
+    if (patch.name !== undefined) dbPatch.name = patch.name;
+    if (patch.specialty !== undefined) dbPatch.specialty = patch.specialty;
+    if (patch.phone !== undefined) dbPatch.phone = patch.phone;
+    if (patch.email !== undefined) dbPatch.email = patch.email;
+    if (patch.commissionPct !== undefined) dbPatch.commission_pct = patch.commissionPct;
+    if (patch.active !== undefined) dbPatch.active = patch.active;
+    const { error } = await supabase.from("specialists").update(dbPatch as never).eq("id", id);
+    if (error) console.error("specialists.update", error);
   },
-  remove: (id: string) => {
+  remove: async (id: string) => {
     specialists = specialists.filter((s) => s.id !== id);
     emit();
+    const { error } = await supabase.from("specialists").delete().eq("id", id);
+    if (error) console.error("specialists.remove", error);
   },
   subscribe: (l: () => void) => {
     listeners.add(l);
