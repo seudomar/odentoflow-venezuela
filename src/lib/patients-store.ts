@@ -25,6 +25,7 @@ export interface Patient {
   history: string;
   files: PatientFile[];
   teeth: Record<number, ToothStatus>;
+  createdAt?: string;
 }
 
 export const TOOTH_NUMBERS = [
@@ -58,6 +59,7 @@ type DBPatient = {
   last_visit: string | null;
   teeth: Record<string, ToothStatus> | null;
   files: PatientFile[] | null;
+  created_at?: string | null;
 };
 
 function fromDB(p: DBPatient): Patient {
