@@ -88,24 +88,22 @@ function Dashboard() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 title="Citas de hoy"
-                value="8"
-                subtitle="2 pendientes de confirmar"
+                value={String(stats.todays.length)}
+                subtitle={`${stats.pendientes} pendientes de confirmar`}
                 icon={Calendar}
-                trend="+2 vs. ayer"
                 accent="primary"
               />
               <StatCard
                 title="Pacientes nuevos"
-                value="3"
-                subtitle="Esta semana: 11"
+                value={String(stats.nuevosSemana)}
+                subtitle={`Este mes: ${stats.nuevosMes}`}
                 icon={UserPlus}
-                trend="+15% mensual"
                 accent="success"
               />
               <StatCard
                 title="Ingresos en $"
-                value={`$${ingresosUSD.toLocaleString("en-US")}`}
-                subtitle="Acumulado del día"
+                value={`$${ingresosUSD.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+                subtitle={`Mes: $${stats.ingresosMes.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
                 icon={DollarSign}
                 accent="primary"
               />
@@ -121,12 +119,18 @@ function Dashboard() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-base">Próximas citas</CardTitle>
+                  <CardTitle className="text-base">Citas de hoy</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
+                  {upcoming.length === 0 && (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                      No hay citas para hoy.{" "}
+                      <Link to="/citas" className="text-primary hover:underline">Agendar una</Link>
+                    </p>
+                  )}
                   {upcoming.map((c) => (
                     <div
-                      key={c.time}
+                      key={c.id}
                       className="flex items-center gap-4 rounded-lg border border-transparent p-3 transition-colors hover:border-border hover:bg-muted/40"
                     >
                       <div className="flex h-10 w-14 shrink-0 flex-col items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -134,11 +138,14 @@ function Dashboard() {
                         <span className="text-xs font-semibold">{c.time}</span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-foreground">{c.patient}</p>
+                        <p className="truncate text-sm font-medium text-foreground">{c.patientName}</p>
                         <p className="truncate text-xs text-muted-foreground">{c.treatment}</p>
                       </div>
-                      <span className="hidden rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-[oklch(0.5_0.15_155)] sm:inline">
-                        Confirmada
+                      <span
+                        className="hidden rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline"
+                        style={{ color: STATUS_META[c.status].color, backgroundColor: STATUS_META[c.status].bg }}
+                      >
+                        {STATUS_META[c.status].label}
                       </span>
                     </div>
                   ))}
