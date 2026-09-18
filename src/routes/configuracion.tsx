@@ -14,6 +14,7 @@ import {
 import { useClinicSettings } from "@/lib/clinic-settings-store";
 import { useBcvRate } from "@/lib/rate-store";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadLogo, removeStorageFile, useFileUrl, LOGO_BUCKET } from "@/lib/storage";
 import { toast } from "sonner";
 import {
   Building2, FileText, KeyRound, Crown, Upload, Trash2,
@@ -77,16 +78,28 @@ function ProfileTab() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [draftRate, setDraftRate] = useState(rate.toString());
 
-  const onLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = "";
     if (!f) return;
-    if (f.size > 1024 * 1024) {
-      toast.error("El logo debe pesar menos de 1 MB.");
+    if (f.size > 2 * 1024 * 1024) {
+      toast.error("El logo debe pesar menos de 2 MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => set({ logoDataUrl: String(reader.result) });
-    reader.readAsDataURL(f);
+    try {
+      if (s.logoPath) await removeStorageFile(LOGO_BUCKET, s.logoPath);
+      const path = await uploadLogo(f);
+      set({ logoPath: path, logoDataUrl: "" });
+      toast.success("Logo actualizado.");
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo subir el logo. Intenta de nuevo.");
+    }
+  };
+
+  const clearLogo = async () => {
+    if (s.logoPath) await removeStorageFile(LOGO_BUCKET, s.logoPath);
+    set({ logoPath: "", logoDataUrl: "" });
   };
 
   const saveAll = () => {
