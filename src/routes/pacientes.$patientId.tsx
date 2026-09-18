@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Odontogram } from "@/components/Odontogram";
 import { TreatmentPlan } from "@/components/TreatmentPlan";
 import { usePatient, patientsStore, type PatientFile } from "@/lib/patients-store";
+import { uploadPatientFile, useFileUrl, PATIENT_BUCKET } from "@/lib/storage";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Save,
@@ -47,23 +49,27 @@ function PatientDetail() {
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    for (const f of files) {
-      if (f.size > 5 * 1024 * 1024) continue;
-      const dataUrl = await new Promise<string>((res) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result as string);
-        r.readAsDataURL(f);
-      });
-      const file: PatientFile = {
-        id: `f${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        name: f.name,
-        type: f.type,
-        dataUrl,
-        uploadedAt: new Date().toISOString(),
-      };
-      patientsStore.addFile(patient.id, file);
-    }
     if (fileRef.current) fileRef.current.value = "";
+    for (const f of files) {
+      if (f.size > 10 * 1024 * 1024) {
+        toast.error(`"${f.name}" supera los 10 MB.`);
+        continue;
+      }
+      try {
+        const path = await uploadPatientFile(patient.id, f);
+        const file: PatientFile = {
+          id: `f${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          name: f.name,
+          type: f.type,
+          path,
+          uploadedAt: new Date().toISOString(),
+        };
+        await patientsStore.addFile(patient.id, file);
+      } catch (err) {
+        console.error(err);
+        toast.error(`No se pudo subir "${f.name}".`);
+      }
+    }
   };
 
   const saveHistory = () => {
