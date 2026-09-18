@@ -252,8 +252,8 @@ function BudgetDialog({
         <div id="budget-print-area" className="max-h-[60vh] overflow-y-auto rounded-md border bg-white p-5 text-[13px] text-neutral-900">
           <div className="header" style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid #111", paddingBottom: 12, gap: 16 }}>
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              {clinic.logoDataUrl && (
-                <img src={clinic.logoDataUrl} alt="Logo" className="logo" style={{ maxHeight: 64, maxWidth: 140, objectFit: "contain" }} />
+              {logoUrl && (
+                <img src={logoUrl} alt="Logo" className="logo" style={{ maxHeight: 64, maxWidth: 140, objectFit: "contain" }} />
               )}
               <div>
                 <h1 style={{ fontSize: 18, margin: 0 }}>{clinic.clinicName}</h1>
