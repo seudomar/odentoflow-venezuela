@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useBcvRate } from "@/lib/rate-store";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -8,6 +8,9 @@ import { StatCard } from "@/components/StatCard";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, UserPlus, DollarSign, Banknote, Clock } from "lucide-react";
+import { useAppointments, STATUS_META } from "@/lib/appointments-store";
+import { usePayments } from "@/lib/payments-store";
+import { usePatients } from "@/lib/patients-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,22 +22,51 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
+const isoDay = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 function Dashboard() {
   const [rate, setRate] = useBcvRate();
+  const appointments = useAppointments();
+  const payments = usePayments();
+  const patients = usePatients();
+  const [todayISO, setTodayISO] = useState("");
   const [today, setToday] = useState("");
-  useEffect(() => {
-    setToday(new Date().toLocaleDateString("es-VE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
-  }, []);
-  const ingresosUSD = 1240;
-  const ingresosBs = ingresosUSD * rate;
 
-  const upcoming = [
-    { time: "09:00", patient: "María González", treatment: "Limpieza dental" },
-    { time: "10:30", patient: "Carlos Pérez", treatment: "Endodoncia · Sesión 2" },
-    { time: "12:00", patient: "Ana Rodríguez", treatment: "Consulta inicial" },
-    { time: "14:30", patient: "Luis Hernández", treatment: "Blanqueamiento" },
-    { time: "16:00", patient: "Sofía Martínez", treatment: "Ortodoncia · Control" },
-  ];
+  useEffect(() => {
+    const now = new Date();
+    setTodayISO(isoDay(now));
+    setToday(now.toLocaleDateString("es-VE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
+  }, []);
+
+  const stats = useMemo(() => {
+    if (!todayISO) {
+      return { todays: [], pendientes: 0, nuevosSemana: 0, nuevosMes: 0, ingresosUSD: 0, ingresosMes: 0 };
+    }
+    const todays = appointments
+      .filter((a) => a.date === todayISO && a.status !== "cancelado")
+      .sort((a, b) => a.time.localeCompare(b.time));
+    const pendientes = todays.filter((a) => a.status === "pendiente").length;
+
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 864e5);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nuevosSemana = patients.filter((p) => p.createdAt && new Date(p.createdAt) >= weekAgo).length;
+    const nuevosMes = patients.filter((p) => p.createdAt && new Date(p.createdAt) >= monthStart).length;
+
+    const ingresosUSD = payments
+      .filter((p) => p.date?.slice(0, 10) === todayISO)
+      .reduce((s, p) => s + (p.amountUSD || 0), 0);
+    const ingresosMes = payments
+      .filter((p) => p.date && new Date(p.date) >= monthStart)
+      .reduce((s, p) => s + (p.amountUSD || 0), 0);
+
+    return { todays, pendientes, nuevosSemana, nuevosMes, ingresosUSD, ingresosMes };
+  }, [appointments, payments, patients, todayISO]);
+
+  const ingresosUSD = stats.ingresosUSD;
+  const ingresosBs = ingresosUSD * rate;
+  const upcoming = stats.todays;
 
   return (
     <AuthGuard>
