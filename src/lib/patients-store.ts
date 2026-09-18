@@ -78,6 +78,7 @@ function fromDB(p: DBPatient): Patient {
     history: p.history ?? "",
     files: p.files ?? [],
     teeth,
+    createdAt: p.created_at ?? undefined,
   };
 }
 
