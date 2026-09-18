@@ -70,6 +70,9 @@ function LoginPage() {
               {busy ? "Ingresando…" : "Iniciar sesión"}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
+              <Link to="/recuperar" className="text-primary hover:underline">¿Olvidaste tu contraseña?</Link>
+            </p>
+            <p className="text-center text-xs text-muted-foreground">
               ¿No tienes cuenta?{" "}
               <Link to="/registro" className="text-primary hover:underline">Regístrate</Link>
             </p>

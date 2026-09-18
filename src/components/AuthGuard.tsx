@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-store";
 import { Loader2 } from "lucide-react";
@@ -9,14 +9,19 @@ import { Loader2 } from "lucide-react";
 export function AuthGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated && !loading && !user) {
       navigate({ to: "/login" });
     }
-  }, [loading, user, navigate]);
+  }, [hydrated, loading, user, navigate]);
 
-  if (loading || !user) {
+  if (!hydrated || loading || !user) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">

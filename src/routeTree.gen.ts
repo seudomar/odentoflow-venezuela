@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TratamientosRouteImport } from './routes/tratamientos'
 import { Route as TerminosRouteImport } from './routes/terminos'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as RecuperarRouteImport } from './routes/recuperar'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as FinanzasRouteImport } from './routes/finanzas'
@@ -33,9 +35,19 @@ const TerminosRoute = TerminosRouteImport.update({
   path: '/terminos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuperarRoute = RecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -98,7 +110,9 @@ export interface FileRoutesByFullPath {
   '/finanzas': typeof FinanzasRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terminos': typeof TerminosRoute
   '/tratamientos': typeof TratamientosRoute
   '/pacientes/$patientId': typeof PacientesPatientIdRoute
@@ -113,7 +127,9 @@ export interface FileRoutesByTo {
   '/finanzas': typeof FinanzasRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terminos': typeof TerminosRoute
   '/tratamientos': typeof TratamientosRoute
   '/pacientes/$patientId': typeof PacientesPatientIdRoute
@@ -129,7 +145,9 @@ export interface FileRoutesById {
   '/finanzas': typeof FinanzasRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terminos': typeof TerminosRoute
   '/tratamientos': typeof TratamientosRoute
   '/pacientes/$patientId': typeof PacientesPatientIdRoute
@@ -146,7 +164,9 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/landing'
     | '/login'
+    | '/recuperar'
     | '/registro'
+    | '/reset-password'
     | '/terminos'
     | '/tratamientos'
     | '/pacientes/$patientId'
@@ -161,7 +181,9 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/landing'
     | '/login'
+    | '/recuperar'
     | '/registro'
+    | '/reset-password'
     | '/terminos'
     | '/tratamientos'
     | '/pacientes/$patientId'
@@ -176,7 +198,9 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/landing'
     | '/login'
+    | '/recuperar'
     | '/registro'
+    | '/reset-password'
     | '/terminos'
     | '/tratamientos'
     | '/pacientes/$patientId'
@@ -192,7 +216,9 @@ export interface RootRouteChildren {
   FinanzasRoute: typeof FinanzasRoute
   LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
+  RecuperarRoute: typeof RecuperarRoute
   RegistroRoute: typeof RegistroRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TerminosRoute: typeof TerminosRoute
   TratamientosRoute: typeof TratamientosRoute
   PacientesPatientIdRoute: typeof PacientesPatientIdRoute
@@ -215,11 +241,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TerminosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/registro': {
       id: '/registro'
       path: '/registro'
       fullPath: '/registro'
       preLoaderRoute: typeof RegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recuperar': {
+      id: '/recuperar'
+      path: '/recuperar'
+      fullPath: '/recuperar'
+      preLoaderRoute: typeof RecuperarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -304,7 +344,9 @@ const rootRouteChildren: RootRouteChildren = {
   FinanzasRoute: FinanzasRoute,
   LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
+  RecuperarRoute: RecuperarRoute,
   RegistroRoute: RegistroRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TerminosRoute: TerminosRoute,
   TratamientosRoute: TratamientosRoute,
   PacientesPatientIdRoute: PacientesPatientIdRoute,
