@@ -182,22 +182,11 @@ function PatientDetail() {
                 ) : (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                     {patient.files.map((f) => (
-                      <div key={f.id} className="group relative overflow-hidden rounded-lg border bg-muted">
-                        <a href={f.dataUrl} target="_blank" rel="noreferrer" className="block aspect-square">
-                          <img src={f.dataUrl} alt={f.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                        </a>
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                          <p className="truncate text-[11px] font-medium text-white">{f.name}</p>
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          className="absolute right-1.5 top-1.5 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                          onClick={() => patientsStore.removeFile(patient.id, f.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      <FileTile
+                        key={f.id}
+                        file={f}
+                        onRemove={() => patientsStore.removeFile(patient.id, f.id)}
+                      />
                     ))}
                   </div>
                 )}
