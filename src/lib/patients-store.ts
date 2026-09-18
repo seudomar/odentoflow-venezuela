@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { authStore } from "@/lib/auth-store";
+import { removeStorageFile, PATIENT_BUCKET } from "@/lib/storage";
 
 export type ToothStatus = "sano" | "caries" | "tratado" | "ausente";
 
@@ -8,7 +9,10 @@ export interface PatientFile {
   id: string;
   name: string;
   type: string;
-  dataUrl: string;
+  /** Ruta en el almacén de archivos (nuevo formato) */
+  path?: string;
+  /** Formato heredado: imagen embebida en base64 */
+  dataUrl?: string;
   uploadedAt: string;
 }
 
@@ -187,6 +191,8 @@ export const patientsStore = {
   removeFile: async (id: string, fileId: string) => {
     const target = patients.find((p) => p.id === id);
     if (!target) return;
+    const removed = target.files.find((f) => f.id === fileId);
+    if (removed?.path) void removeStorageFile(PATIENT_BUCKET, removed.path);
     const newFiles = target.files.filter((f) => f.id !== fileId);
     patients = patients.map((p) => (p.id === id ? { ...p, files: newFiles } : p));
     emit();

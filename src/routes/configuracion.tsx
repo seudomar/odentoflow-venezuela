@@ -14,6 +14,7 @@ import {
 import { useClinicSettings } from "@/lib/clinic-settings-store";
 import { useBcvRate } from "@/lib/rate-store";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadLogo, removeStorageFile, useFileUrl, LOGO_BUCKET } from "@/lib/storage";
 import { toast } from "sonner";
 import {
   Building2, FileText, KeyRound, Crown, Upload, Trash2,
@@ -76,17 +77,30 @@ function ProfileTab() {
   const [rate, setRate] = useBcvRate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [draftRate, setDraftRate] = useState(rate.toString());
+  const logoUrl = useFileUrl(LOGO_BUCKET, s.logoPath, s.logoDataUrl);
 
-  const onLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = "";
     if (!f) return;
-    if (f.size > 1024 * 1024) {
-      toast.error("El logo debe pesar menos de 1 MB.");
+    if (f.size > 2 * 1024 * 1024) {
+      toast.error("El logo debe pesar menos de 2 MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => set({ logoDataUrl: String(reader.result) });
-    reader.readAsDataURL(f);
+    try {
+      if (s.logoPath) await removeStorageFile(LOGO_BUCKET, s.logoPath);
+      const path = await uploadLogo(f);
+      set({ logoPath: path, logoDataUrl: "" });
+      toast.success("Logo actualizado.");
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo subir el logo. Intenta de nuevo.");
+    }
+  };
+
+  const clearLogo = async () => {
+    if (s.logoPath) await removeStorageFile(LOGO_BUCKET, s.logoPath);
+    set({ logoPath: "", logoDataUrl: "" });
   };
 
   const saveAll = () => {
@@ -103,8 +117,8 @@ function ProfileTab() {
       <CardContent className="space-y-5">
         <div className="flex flex-col items-start gap-4 sm:flex-row">
           <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-xl border bg-muted/30">
-            {s.logoDataUrl ? (
-              <img src={s.logoDataUrl} alt="Logo del consultorio" className="h-full w-full object-contain" />
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo del consultorio" className="h-full w-full object-contain" />
             ) : (
               <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Sin logo</span>
             )}
@@ -112,15 +126,15 @@ function ProfileTab() {
           <div className="flex-1 space-y-2">
             <Label className="text-xs">Logo del consultorio</Label>
             <p className="text-xs text-muted-foreground">
-              Aparecerá en presupuestos y recibos. PNG o JPG, máx. 1 MB.
+              Aparecerá en presupuestos y recibos. PNG o JPG, máx. 2 MB.
             </p>
             <div className="flex gap-2">
               <input ref={fileRef} type="file" accept="image/*" onChange={onLogo} className="hidden" />
               <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()} className="gap-1.5">
                 <Upload className="h-3.5 w-3.5" /> Subir logo
               </Button>
-              {s.logoDataUrl && (
-                <Button size="sm" variant="ghost" onClick={() => set({ logoDataUrl: "" })} className="gap-1.5 text-destructive">
+              {logoUrl && (
+                <Button size="sm" variant="ghost" onClick={clearLogo} className="gap-1.5 text-destructive">
                   <Trash2 className="h-3.5 w-3.5" /> Quitar
                 </Button>
               )}

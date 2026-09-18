@@ -12,7 +12,8 @@ export interface ClinicSettings {
   address: string;
   phone: string;
   email: string;
-  logoDataUrl: string; // base64 data URL
+  logoDataUrl: string; // heredado: base64 data URL
+  logoPath: string; // ruta en el almacén de archivos
   // Tasa
   rateSource: RateSource;
   rateValue: number;
@@ -35,6 +36,7 @@ const DEFAULTS: ClinicSettings = {
   phone: "",
   email: "",
   logoDataUrl: "",
+  logoPath: "",
   rateSource: "manual",
   rateValue: 36.5,
   legalNote:
@@ -54,6 +56,7 @@ type DBSettings = {
   phone: string;
   email: string;
   logo_data_url: string;
+  logo_path: string;
   rate_source: string;
   rate_value: string | number;
   legal_note: string;
@@ -74,6 +77,7 @@ const fromDB = (s: DBSettings): ClinicSettings => ({
   phone: s.phone ?? "",
   email: s.email ?? "",
   logoDataUrl: s.logo_data_url ?? "",
+  logoPath: s.logo_path ?? "",
   rateSource: (s.rate_source as RateSource) ?? "manual",
   rateValue: num(s.rate_value ?? 36.5),
   legalNote: s.legal_note ?? "",
@@ -93,6 +97,7 @@ function toDB(p: Partial<ClinicSettings>): Record<string, unknown> {
   if (p.phone !== undefined) d.phone = p.phone;
   if (p.email !== undefined) d.email = p.email;
   if (p.logoDataUrl !== undefined) d.logo_data_url = p.logoDataUrl;
+  if (p.logoPath !== undefined) d.logo_path = p.logoPath;
   if (p.rateSource !== undefined) d.rate_source = p.rateSource;
   if (p.rateValue !== undefined) d.rate_value = p.rateValue;
   if (p.legalNote !== undefined) d.legal_note = p.legalNote;

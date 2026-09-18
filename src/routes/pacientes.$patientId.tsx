@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Odontogram } from "@/components/Odontogram";
 import { TreatmentPlan } from "@/components/TreatmentPlan";
 import { usePatient, patientsStore, type PatientFile } from "@/lib/patients-store";
+import { uploadPatientFile, useFileUrl, PATIENT_BUCKET } from "@/lib/storage";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Save,
@@ -47,23 +49,27 @@ function PatientDetail() {
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    for (const f of files) {
-      if (f.size > 5 * 1024 * 1024) continue;
-      const dataUrl = await new Promise<string>((res) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result as string);
-        r.readAsDataURL(f);
-      });
-      const file: PatientFile = {
-        id: `f${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        name: f.name,
-        type: f.type,
-        dataUrl,
-        uploadedAt: new Date().toISOString(),
-      };
-      patientsStore.addFile(patient.id, file);
-    }
     if (fileRef.current) fileRef.current.value = "";
+    for (const f of files) {
+      if (f.size > 10 * 1024 * 1024) {
+        toast.error(`"${f.name}" supera los 10 MB.`);
+        continue;
+      }
+      try {
+        const path = await uploadPatientFile(patient.id, f);
+        const file: PatientFile = {
+          id: `f${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          name: f.name,
+          type: f.type,
+          path,
+          uploadedAt: new Date().toISOString(),
+        };
+        await patientsStore.addFile(patient.id, file);
+      } catch (err) {
+        console.error(err);
+        toast.error(`No se pudo subir "${f.name}".`);
+      }
+    }
   };
 
   const saveHistory = () => {
@@ -158,7 +164,7 @@ function PatientDetail() {
                 <input
                   ref={fileRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,application/pdf"
                   multiple
                   className="hidden"
                   onChange={onUpload}
@@ -176,22 +182,11 @@ function PatientDetail() {
                 ) : (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                     {patient.files.map((f) => (
-                      <div key={f.id} className="group relative overflow-hidden rounded-lg border bg-muted">
-                        <a href={f.dataUrl} target="_blank" rel="noreferrer" className="block aspect-square">
-                          <img src={f.dataUrl} alt={f.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                        </a>
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                          <p className="truncate text-[11px] font-medium text-white">{f.name}</p>
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          className="absolute right-1.5 top-1.5 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                          onClick={() => patientsStore.removeFile(patient.id, f.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      <FileTile
+                        key={f.id}
+                        file={f}
+                        onRemove={() => patientsStore.removeFile(patient.id, f.id)}
+                      />
                     ))}
                   </div>
                 )}
@@ -227,6 +222,40 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ cla
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-medium text-foreground">{value}</p>
       </div>
+    </div>
+  );
+}
+
+function FileTile({ file, onRemove }: { file: PatientFile; onRemove: () => void }) {
+  const url = useFileUrl(PATIENT_BUCKET, file.path, file.dataUrl);
+  const isPdf = file.type === "application/pdf";
+
+  return (
+    <div className="group relative overflow-hidden rounded-lg border bg-muted">
+      <a href={url || undefined} target="_blank" rel="noreferrer" className="block aspect-square">
+        {url && !isPdf ? (
+          <img
+            src={url}
+            alt={file.name}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          />
+        ) : (
+          <div className="grid h-full w-full place-items-center">
+            <FileText className="h-8 w-8 text-muted-foreground/60" />
+          </div>
+        )}
+      </a>
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+        <p className="truncate text-[11px] font-medium text-white">{file.name}</p>
+      </div>
+      <Button
+        size="icon"
+        variant="destructive"
+        className="absolute right-1.5 top-1.5 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+        onClick={onRemove}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
     </div>
   );
 }

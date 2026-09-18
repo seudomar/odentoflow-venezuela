@@ -123,6 +123,7 @@ export type Database = {
           email: string
           legal_note: string
           logo_data_url: string
+          logo_path: string
           payment_instructions: string
           phone: string
           plan: string
@@ -143,6 +144,7 @@ export type Database = {
           email?: string
           legal_note?: string
           logo_data_url?: string
+          logo_path?: string
           payment_instructions?: string
           phone?: string
           plan?: string
@@ -163,6 +165,7 @@ export type Database = {
           email?: string
           legal_note?: string
           logo_data_url?: string
+          logo_path?: string
           payment_instructions?: string
           phone?: string
           plan?: string

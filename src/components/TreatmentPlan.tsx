@@ -19,6 +19,7 @@ import { useServices } from "@/lib/services-store";
 import { useSpecialists } from "@/lib/specialists-store";
 import { useBcvRate } from "@/lib/rate-store";
 import { useClinicSettings } from "@/lib/clinic-settings-store";
+import { useFileUrl, LOGO_BUCKET } from "@/lib/storage";
 import type { Patient } from "@/lib/patients-store";
 import { Plus, Trash2, Printer, FileDown, ClipboardList, Stethoscope } from "lucide-react";
 
@@ -214,6 +215,7 @@ function BudgetDialog({
   totalUSD: number;
 }) {
   const [clinic] = useClinicSettings();
+  const logoUrl = useFileUrl(LOGO_BUCKET, clinic.logoPath, clinic.logoDataUrl);
   const today = new Date().toLocaleDateString("es-VE", { day: "2-digit", month: "long", year: "numeric" });
   const totalVEF = totalUSD * rate;
 
@@ -252,8 +254,8 @@ function BudgetDialog({
         <div id="budget-print-area" className="max-h-[60vh] overflow-y-auto rounded-md border bg-white p-5 text-[13px] text-neutral-900">
           <div className="header" style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid #111", paddingBottom: 12, gap: 16 }}>
             <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              {clinic.logoDataUrl && (
-                <img src={clinic.logoDataUrl} alt="Logo" className="logo" style={{ maxHeight: 64, maxWidth: 140, objectFit: "contain" }} />
+              {logoUrl && (
+                <img src={logoUrl} alt="Logo" className="logo" style={{ maxHeight: 64, maxWidth: 140, objectFit: "contain" }} />
               )}
               <div>
                 <h1 style={{ fontSize: 18, margin: 0 }}>{clinic.clinicName}</h1>
