@@ -19,6 +19,7 @@ import { useServices } from "@/lib/services-store";
 import { useSpecialists } from "@/lib/specialists-store";
 import { useBcvRate } from "@/lib/rate-store";
 import { useClinicSettings } from "@/lib/clinic-settings-store";
+import { useFileUrl, LOGO_BUCKET } from "@/lib/storage";
 import type { Patient } from "@/lib/patients-store";
 import { Plus, Trash2, Printer, FileDown, ClipboardList, Stethoscope } from "lucide-react";
 
@@ -214,6 +215,7 @@ function BudgetDialog({
   totalUSD: number;
 }) {
   const [clinic] = useClinicSettings();
+  const logoUrl = useFileUrl(LOGO_BUCKET, clinic.logoPath, clinic.logoDataUrl);
   const today = new Date().toLocaleDateString("es-VE", { day: "2-digit", month: "long", year: "numeric" });
   const totalVEF = totalUSD * rate;
 
